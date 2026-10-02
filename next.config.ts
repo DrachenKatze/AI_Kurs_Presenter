@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  agentRules: false, // stop `next dev` from appending rules to our CLAUDE.md
 };
 
 export default nextConfig;
