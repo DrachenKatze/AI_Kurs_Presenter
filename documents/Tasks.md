@@ -10,12 +10,12 @@ Ordered by milestone (see Implementation-Plan.md). A task is done when its code 
 - [x] T0.5 Add `.env.example` with `PROJECTS_DIR=./data/projects` and `TEMPLATES_DIR=./data/templates`, and add `data/` to `.gitignore`
 
 ## M1 · Domain Core (pure logic, unit-tested)
-- [ ] T1.1 `types.ts`: Project, DataTable, Template, Slide, SlideElement
-- [ ] T1.2 `project.ts`: `createProject()`, `parseProject()`, `parseTemplate()` (reject invalid JSON or a wrong version with a clear error)
-- [ ] T1.3 `markdownTable.ts`: `parseMarkdownTable()` / `toMarkdownTable()`. Test round-trip, escaped pipes, uneven rows, and files with no table.
-- [ ] T1.4 `table.ts`: add/rename/delete column (delete also removes its cells), add/edit/delete row, `sortRows(columnId, dir)` with numeric-aware comparison
-- [ ] T1.5 `template.ts`: `standardTemplate(columns)`, `unusedColumns(template, columns)`, `missingColumns(template, columns)` (all matched by column name)
-- [ ] T1.6 `presentation.ts`: `generateSlides(table, template)`. One slide per visible row, values filled in by column name (empty if missing), new element IDs.
+- [x] T1.1 `types.ts`: Project, DataTable, Template, Slide, SlideElement
+- [x] T1.2 `project.ts`: `createProject()`, `parseProject()`, `parseTemplate()` (reject invalid JSON or a wrong version with a clear error)
+- [x] T1.3 `markdownTable.ts`: `parseMarkdownTable()` / `toMarkdownTable()`. Test round-trip, escaped pipes, uneven rows, and files with no table.
+- [x] T1.4 `table.ts`: add/rename/delete column (delete also removes its cells), add/edit/delete row, `sortRows(columnId, dir)` with numeric-aware comparison
+- [x] T1.5 `template.ts`: `standardTemplate(columns)`, `unusedColumns(template, columns)`, `missingColumns(template, columns)` (all matched by column name)
+- [x] T1.6 `presentation.ts`: `generateSlides(table, template)`. One slide per visible row, values filled in by column name (empty if missing), new element IDs.
 
 ## M2 · Shell & Storage
 - [ ] T2.1 `server/storage.ts`: `jsonStore(dir)` with `list()`, `read(id)`, `write(id, data)`. Create the folder if it's missing, and reject IDs that don't match `^[a-z0-9-]+$`. Test on a temp dir, including a path-traversal ID.
