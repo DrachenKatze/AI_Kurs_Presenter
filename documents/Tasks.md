@@ -26,10 +26,10 @@ Ordered by milestone (see Implementation-Plan.md). A task is done when its code 
 - [x] T2.6 Test: saving a project and then loading it by ID returns the same state
 
 ## M3 · Data View
-- [ ] T3.1 `DataTable`: render columns and rows, inline cell editing
-- [ ] T3.2 Column header menu: rename, delete. Buttons: add column, add row. Delete per row.
-- [ ] T3.3 List actions: New list, Load `.md`, Save `.md` (`lib/files.ts`: `downloadFile`, `pickFile`)
-- [ ] T3.4 Component test: edit a cell, then add and delete a row and a column
+- [x] T3.1 `DataTable`: render columns and rows, inline cell editing
+- [x] T3.2 Column header menu: rename, delete. Buttons: add column, add row. Delete per row.
+- [x] T3.3 List actions: New list, Load `.md`, Save `.md` (`lib/files.ts`: `downloadFile`, `pickFile`)
+- [x] T3.4 Component test: edit a cell, then add and delete a row and a column
 
 ## M4 · Template Designer
 - [ ] T4.1 `SlideRenderer`: render elements in percent on a 16:9 box (shared by every view)

@@ -1,5 +1,6 @@
 "use client";
 
+import { DataView } from "@/components/data/DataView";
 import { Tabs as UiTabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useProject } from "@/state/ProjectContext";
 import { EmptyState } from "./EmptyState";
@@ -23,7 +24,13 @@ export function Tabs() {
       </TabsList>
       {TABS.map((t) => (
         <TabsContent key={t.value} value={t.value}>
-          {state.project ? <p className="p-4">{t.label}: coming soon</p> : <EmptyState />}
+          {!state.project ? (
+            <EmptyState />
+          ) : t.value === "data" ? (
+            <DataView />
+          ) : (
+            <p className="p-4">{t.label}: coming soon</p>
+          )}
         </TabsContent>
       ))}
     </UiTabs>
