@@ -14,3 +14,23 @@ export function pickFile(accept: string): Promise<string | null> {
     input.click();
   });
 }
+
+/** Opens the file dialog for an image; resolves with a data URL and the file size, or null if cancelled. */
+export function pickImage(): Promise<{ src: string; size: number } | null> {
+  return new Promise((resolve) => {
+    const input = Object.assign(document.createElement("input"), {
+      type: "file",
+      accept: "image/png,image/jpeg,image/svg+xml",
+    });
+    input.onchange = () => {
+      const file = input.files?.[0];
+      if (!file) return resolve(null);
+      const reader = new FileReader();
+      reader.onload = () => resolve({ src: String(reader.result), size: file.size });
+      reader.onerror = () => resolve(null);
+      reader.readAsDataURL(file);
+    };
+    input.oncancel = () => resolve(null);
+    input.click();
+  });
+}

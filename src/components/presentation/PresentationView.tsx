@@ -8,12 +8,14 @@ import type { Slide } from "@/domain/types";
 import { listTemplates, loadTemplate, type ListItem } from "@/lib/api";
 import { useProject } from "@/state/ProjectContext";
 import { PresentationRunner } from "./PresentationRunner";
+import { SlideEditorDialog } from "./SlideEditorDialog";
 import { SlideGrid } from "./SlideGrid";
 
 export function PresentationView() {
   const { state, dispatch } = useProject();
   const [templates, setTemplates] = useState<ListItem[]>([]);
   const [running, setRunning] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [message, setMessage] = useState("");
   const project = state.project!; // rendered only when a project is open
   const { templateId, slides } = project.presentation;
@@ -67,8 +69,15 @@ export function PresentationView() {
       {slides.length === 0 ? (
         <p className="p-4 text-muted-foreground">No presentation yet. Pick a template and click New Presentation.</p>
       ) : (
-        <SlideGrid slides={slides} onChange={(s) => update({ slides: s })} />
+        <SlideGrid slides={slides} onChange={(s) => update({ slides: s })} onOpen={setEditingId} />
       )}
+      <SlideEditorDialog
+        slide={slides.find((s) => s.id === editingId) ?? null}
+        index={slides.findIndex((s) => s.id === editingId)}
+        table={project.table}
+        onChange={(slide) => update({ slides: slides.map((s) => (s.id === slide.id ? slide : s)) })}
+        onClose={() => setEditingId(null)}
+      />
       {running && <PresentationRunner slides={slides} onExit={() => setRunning(false)} />}
     </div>
   );

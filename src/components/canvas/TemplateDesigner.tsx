@@ -8,6 +8,7 @@ import { fieldElement, missingColumns, unusedColumns } from "@/domain/template";
 import type { Template } from "@/domain/types";
 import { listTemplates, loadTemplate, saveTemplate, type ListItem } from "@/lib/api";
 import { useProject } from "@/state/ProjectContext";
+import { AddElementButtons } from "./AddElementButtons";
 import { EditableCanvas } from "./EditableCanvas";
 import { UnusedColumnsSidebar } from "./UnusedColumnsSidebar";
 
@@ -49,6 +50,7 @@ export function TemplateDesigner() {
         </Button>
         <Button onClick={() => run(async () => setPicker(await listTemplates()))}>Load template</Button>
         <Button onClick={save}>Save template</Button>
+        <AddElementButtons onAdd={(el) => edit({ elements: [...template.elements, el] })} />
         <Input
           aria-label="Template name"
           className="w-56"

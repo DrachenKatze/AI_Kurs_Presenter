@@ -51,3 +51,25 @@ test("add, rename and delete a column", async () => {
   await userEvent.click(await screen.findByRole("menuitem", { name: "Delete" }));
   expect(screen.queryByLabelText("Body row 1")).not.toBeInTheDocument();
 });
+
+test("sort toggles between ascending and descending", async () => {
+  setup();
+  await userEvent.click(await screen.findByRole("button", { name: "Add row" }));
+  await userEvent.type(screen.getByLabelText("Title row 2"), "A");
+  // rows: "Hi", "A"
+  const sort = screen.getByRole("button", { name: "Sort Title" });
+  await userEvent.click(sort);
+  expect(screen.getByLabelText("Title row 1")).toHaveValue("A");
+  expect(sort).toHaveTextContent("↑");
+  await userEvent.click(sort);
+  expect(screen.getByLabelText("Title row 1")).toHaveValue("Hi");
+  expect(sort).toHaveTextContent("↓");
+});
+
+test("hide toggle marks a row hidden", async () => {
+  setup();
+  const box = await screen.findByLabelText("Hide row 1");
+  expect(box).not.toBeChecked();
+  await userEvent.click(box);
+  expect(screen.getByLabelText("Hide row 1")).toBeChecked();
+});

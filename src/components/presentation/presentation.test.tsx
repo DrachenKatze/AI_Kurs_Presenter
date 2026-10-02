@@ -2,7 +2,8 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useEffect } from "react";
 import { createProject } from "@/domain/project";
-import { generateSlides, moveSlide } from "@/domain/presentation";
+import { moveById } from "@/domain/order";
+import { generateSlides } from "@/domain/presentation";
 import { standardTemplate } from "@/domain/template";
 import type { DataTable } from "@/domain/types";
 import { ProjectProvider, useProject } from "@/state/ProjectContext";
@@ -48,12 +49,12 @@ test("New Presentation creates one slide per visible row; Start is enabled after
   expect(confirm).toHaveBeenCalled();
 });
 
-test("moveSlide reorders and ignores unknown ids", () => {
+test("moveById reorders and ignores unknown ids", () => {
   const slides = generateSlides(table, standardTemplate(table.columns));
   const [a, b, c] = slides.map((s) => s.id);
-  expect(moveSlide(slides, a, c).map((s) => s.id)).toEqual([b, c, a]);
-  expect(moveSlide(slides, c, a).map((s) => s.id)).toEqual([c, a, b]);
-  expect(moveSlide(slides, a, "nope")).toBe(slides);
+  expect(moveById(slides, a, c).map((s) => s.id)).toEqual([b, c, a]);
+  expect(moveById(slides, c, a).map((s) => s.id)).toEqual([c, a, b]);
+  expect(moveById(slides, a, "nope")).toBe(slides);
 });
 
 test("runner: arrow keys and click change the slide, Esc exits", () => {

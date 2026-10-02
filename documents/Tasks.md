@@ -47,8 +47,8 @@ Ordered by milestone (see Implementation-Plan.md). A task is done when its code 
 - [ ] T5.5 Manual end-to-end check: new project → `.md` import → template edit + save → generate → present → save → reload → second project uses the same template
 
 ## M6 · MVP Complete (P2)
-- [ ] T6.1 B3 Sort by column header (ASC/DESC toggle)
-- [ ] T6.2 B4 Row drag reorder + hide toggle
-- [ ] T6.3 D4 Single Slide Editor: double-click a slide → dialog with `EditableCanvas` on the slide snapshot, plus that row's unmapped columns
-- [ ] T6.4 D5 Add a text box and an image upload (PNG/JPG/SVG → data URL, warn if over 2 MB) in the slide editor and the template designer
-- [ ] T6.5 Tests for each item above
+- [x] T6.1 B3 Sort by column header (ASC/DESC toggle)
+- [x] T6.2 B4 Row drag reorder + hide toggle
+- [x] T6.3 D4 Single Slide Editor: double-click a slide → dialog with `EditableCanvas` on the slide snapshot, plus that row's unmapped columns
+- [x] T6.4 D5 Add a text box and an image upload (PNG/JPG/SVG → data URL, warn if over 2 MB) in the slide editor and the template designer
+- [x] T6.5 Tests for each item above

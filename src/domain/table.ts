@@ -42,3 +42,8 @@ export function sortRows(t: DataTable, columnId: Id, dir: "asc" | "desc"): DataT
   const rows = [...t.rows].sort((a, b) => sign * cmp(a.cells[columnId] ?? "", b.cells[columnId] ?? ""));
   return { ...t, rows };
 }
+
+export const toggleHidden = (t: DataTable, rowId: Id): DataTable => ({
+  ...t,
+  rows: t.rows.map((r) => (r.id === rowId ? { ...r, hidden: !r.hidden } : r)),
+});

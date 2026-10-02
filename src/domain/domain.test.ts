@@ -1,7 +1,8 @@
 import { parseMarkdownTable, toMarkdownTable } from "./markdownTable";
+import { moveById } from "./order";
 import { generateSlides } from "./presentation";
 import { createProject, parseProject, parseTemplate } from "./project";
-import { addColumn, addRow, deleteColumn, deleteRow, editCell, renameColumn, sortRows } from "./table";
+import { addColumn, addRow, deleteColumn, deleteRow, editCell, renameColumn, sortRows, toggleHidden } from "./table";
 import { missingColumns, standardTemplate, unusedColumns } from "./template";
 import type { DataTable } from "./types";
 
@@ -129,5 +130,22 @@ describe("template + presentation", () => {
   test("generateSlides: missing column gives empty text", () => {
     const tpl = standardTemplate([...table.columns, { id: "x", name: "Ghost" }]);
     expect(generateSlides(table, tpl)[0].elements[2].text).toBe("");
+  });
+});
+
+describe("row order and visibility", () => {
+  const rows = ["a", "b", "c"].map((id) => ({ id, hidden: false, cells: {} }));
+
+  test("moveById reorders and ignores unknown ids", () => {
+    expect(moveById(rows, "a", "c").map((r) => r.id)).toEqual(["b", "c", "a"]);
+    expect(moveById(rows, "c", "a").map((r) => r.id)).toEqual(["c", "a", "b"]);
+    expect(moveById(rows, "a", "x")).toBe(rows);
+  });
+
+  test("toggleHidden flips one row, hidden rows get no slide", () => {
+    const t = toggleHidden({ columns: [{ id: "c", name: "T" }], rows }, "b");
+    expect(t.rows.map((r) => r.hidden)).toEqual([false, true, false]);
+    expect(generateSlides(t, standardTemplate(t.columns)).map((s) => s.rowId)).toEqual(["a", "c"]);
+    expect(toggleHidden(t, "b").rows[1].hidden).toBe(false);
   });
 });

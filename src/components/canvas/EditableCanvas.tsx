@@ -88,6 +88,12 @@ export function EditableCanvas({ elements, onChange, missing = [] }: Props) {
           e.columnName && missing.includes(e.columnName) && "bg-accent-yellow",
         ),
         onPointerDown: (ev) => start("move", e, ev),
+        onDoubleClick: () => {
+          if (e.kind !== "text") return;
+          // ponytail: window.prompt keeps text editing tiny; replace with an inline editor for multi-line text
+          const text = window.prompt("Text", e.text ?? "");
+          if (text !== null) patch(e.id, { text });
+        },
       })}
       overlay={(e) => (
         <>
