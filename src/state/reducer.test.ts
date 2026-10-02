@@ -16,6 +16,17 @@ test("updateProject patches the open project, ignored when none is open", () => 
   expect(reducer(initialState, { type: "updateProject", patch: { name: "Q" } })).toBe(initialState);
 });
 
+test("an unedited Standard Template follows column changes; an edited one does not", () => {
+  const cols = [{ id: "c1", name: "Title" }];
+  const s = reducer(initialState, { type: "open", project: createProject("P") });
+  const followed = reducer(s, { type: "updateProject", patch: { table: { columns: cols, rows: [] } } });
+  expect(followed.activeTemplate?.elements.map((e) => e.columnName)).toEqual(["Title"]);
+
+  const edited = { ...s.activeTemplate!, id: "custom" };
+  const kept = reducer({ ...s, activeTemplate: edited }, { type: "updateProject", patch: { table: { columns: cols, rows: [] } } });
+  expect(kept.activeTemplate).toBe(edited);
+});
+
 test("setActiveTemplate replaces the template", () => {
   const t = standardTemplate([]);
   expect(reducer(initialState, { type: "setActiveTemplate", template: t }).activeTemplate).toBe(t);

@@ -13,12 +13,19 @@ export type Action =
 
 export const initialState: State = { project: null, activeTemplate: null };
 
+const columnNames = (p: Project) => p.table.columns.map((c) => c.name).join("\n");
+
 export function reducer(state: State, action: Action): State {
   switch (action.type) {
     case "open":
       return { project: action.project, activeTemplate: standardTemplate(action.project.table.columns) };
-    case "updateProject":
-      return state.project ? { ...state, project: { ...state.project, ...action.patch } } : state;
+    case "updateProject": {
+      if (!state.project) return state;
+      const project = { ...state.project, ...action.patch };
+      // An unedited Standard Template (id 'standard') follows the columns; editing it gives it its own id.
+      const follow = state.activeTemplate?.id === "standard" && columnNames(project) !== columnNames(state.project);
+      return { project, activeTemplate: follow ? standardTemplate(project.table.columns) : state.activeTemplate };
+    }
     case "setActiveTemplate":
       return { ...state, activeTemplate: action.template };
   }

@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { createProject } from "@/domain/project";
 import { listProjects, loadProject, saveProject, type ListItem } from "@/lib/api";
 import { useProject } from "@/state/ProjectContext";
+import { ListDialog } from "./ListDialog";
 
 export function TopBar() {
   const { state, dispatch } = useProject();
@@ -47,32 +47,17 @@ export function TopBar() {
         Settings
       </Button>
 
-      <Dialog open={picker !== null} onOpenChange={(open) => !open && setPicker(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Load project</DialogTitle>
-          </DialogHeader>
-          {picker?.length === 0 && <p className="text-muted-foreground">No saved projects yet.</p>}
-          <ul className="flex flex-col gap-2">
-            {picker?.map((p) => (
-              <li key={p.id}>
-                <Button
-                  variant="outline"
-                  className="w-full justify-start"
-                  onClick={() =>
-                    run(async () => {
-                      dispatch({ type: "open", project: await loadProject(p.id) });
-                      setPicker(null);
-                    })
-                  }
-                >
-                  {p.name}
-                </Button>
-              </li>
-            ))}
-          </ul>
-        </DialogContent>
-      </Dialog>
+      <ListDialog
+        title="Load project"
+        items={picker}
+        onClose={() => setPicker(null)}
+        onPick={(id) =>
+          run(async () => {
+            dispatch({ type: "open", project: await loadProject(id) });
+            setPicker(null);
+          })
+        }
+      />
     </header>
   );
 }

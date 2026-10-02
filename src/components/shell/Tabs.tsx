@@ -1,5 +1,6 @@
 "use client";
 
+import { TemplateDesigner } from "@/components/canvas/TemplateDesigner";
 import { DataView } from "@/components/data/DataView";
 import { Tabs as UiTabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useProject } from "@/state/ProjectContext";
@@ -28,6 +29,8 @@ export function Tabs() {
             <EmptyState />
           ) : t.value === "data" ? (
             <DataView />
+          ) : t.value === "template" ? (
+            <TemplateDesigner />
           ) : (
             <p className="p-4">{t.label}: coming soon</p>
           )}

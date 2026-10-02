@@ -32,12 +32,12 @@ Ordered by milestone (see Implementation-Plan.md). A task is done when its code 
 - [x] T3.4 Component test: edit a cell, then add and delete a row and a column
 
 ## M4 · Template Designer
-- [ ] T4.1 `SlideRenderer`: render elements in percent on a 16:9 box (shared by every view)
-- [ ] T4.2 `EditableCanvas`: select, drag to move, corner-resize, Delete key removes the selected element
-- [ ] T4.3 `UnusedColumnsSidebar`: drag a column onto the canvas to create a field element
-- [ ] T4.4 New projects (and new columns) get the Standard Template
-- [ ] T4.5 Template library: New (blank) / Save (to the Templates folder) / Load (list of the Templates folder). Placeholders with missing columns get a warning marker.
-- [ ] T4.6 Tests: moving or resizing updates the coordinates, dropping a column removes it from the sidebar, and a template saved from project A loads in project B
+- [x] T4.1 `SlideRenderer`: render elements in percent on a 16:9 box (shared by every view)
+- [x] T4.2 `EditableCanvas`: select, drag to move, corner-resize, Delete key removes the selected element
+- [x] T4.3 `UnusedColumnsSidebar`: drag a column onto the canvas to create a field element
+- [x] T4.4 New projects (and new columns) get the Standard Template
+- [x] T4.5 Template library: New (blank) / Save (to the Templates folder) / Load (list of the Templates folder). Placeholders with missing columns get a warning marker.
+- [x] T4.6 Tests: moving or resizing updates the coordinates, dropping a column removes it from the sidebar, and a template saved from project A loads in project B
 
 ## M5 · Presentation (completes P1 MVP)
 - [ ] T5.1 Template selector (Standard + every template in the Templates folder, default: Standard) + "New Presentation" button (asks for confirmation if slides already exist)
