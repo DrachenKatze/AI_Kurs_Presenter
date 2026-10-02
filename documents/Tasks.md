@@ -18,12 +18,12 @@ Ordered by milestone (see Implementation-Plan.md). A task is done when its code 
 - [x] T1.6 `presentation.ts`: `generateSlides(table, template)`. One slide per visible row, values filled in by column name (empty if missing), new element IDs.
 
 ## M2 · Shell & Storage
-- [ ] T2.1 `server/storage.ts`: `jsonStore(dir)` with `list()`, `read(id)`, `write(id, data)`. Create the folder if it's missing, and reject IDs that don't match `^[a-z0-9-]+$`. Test on a temp dir, including a path-traversal ID.
-- [ ] T2.2 Route handlers `api/projects` and `api/templates` (list, GET, PUT) using `jsonStore`, plus `lib/api.ts` fetch wrappers
-- [ ] T2.3 `state/reducer.ts` + `ProjectContext` (project: `Project | null`, activeTemplate). Test the reducer actions.
-- [ ] T2.4 `TopBar`: New / Load (picker listing the Projects folder) / Save on the left, Settings (disabled placeholder) on the right
-- [ ] T2.5 `Tabs`: Data / Template / Presentation, with `EmptyState` when no project is loaded
-- [ ] T2.6 Test: saving a project and then loading it by ID returns the same state
+- [x] T2.1 `server/storage.ts`: `jsonStore(dir)` with `list()`, `read(id)`, `write(id, data)`. Create the folder if it's missing, and reject IDs that don't match `^[a-z0-9-]+$`. Test on a temp dir, including a path-traversal ID.
+- [x] T2.2 Route handlers `api/projects` and `api/templates` (list, GET, PUT) using `jsonStore`, plus `lib/api.ts` fetch wrappers
+- [x] T2.3 `state/reducer.ts` + `ProjectContext` (project: `Project | null`, activeTemplate). Test the reducer actions.
+- [x] T2.4 `TopBar`: New / Load (picker listing the Projects folder) / Save on the left, Settings (disabled placeholder) on the right
+- [x] T2.5 `Tabs`: Data / Template / Presentation, with `EmptyState` when no project is loaded
+- [x] T2.6 Test: saving a project and then loading it by ID returns the same state
 
 ## M3 · Data View
 - [ ] T3.1 `DataTable`: render columns and rows, inline cell editing
