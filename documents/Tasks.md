@@ -3,11 +3,11 @@
 Ordered by milestone (see Implementation-Plan.md). A task is done when its code and its test are both done.
 
 ## M0 · Setup
-- [ ] T0.1 Create the Next.js app (TypeScript, App Router, `src/`, Tailwind) in the repo root
-- [ ] T0.2 Init shadcn/ui and add Button, Tabs, Dialog, Input, Select, DropdownMenu
-- [ ] T0.3 Add the Design.md colors as theme variables in `globals.css`
-- [ ] T0.4 Set up Vitest + React Testing Library and add the `npm test` script
-- [ ] T0.5 Add `.env.example` with `PROJECTS_DIR=./data/projects` and `TEMPLATES_DIR=./data/templates`, and add `data/` to `.gitignore`
+- [x] T0.1 Create the Next.js app (TypeScript, App Router, `src/`, Tailwind) in the repo root
+- [x] T0.2 Init shadcn/ui and add Button, Tabs, Dialog, Input, Select, DropdownMenu
+- [x] T0.3 Add the Design.md colors as theme variables in `globals.css`
+- [x] T0.4 Set up Vitest + React Testing Library and add the `npm test` script
+- [x] T0.5 Add `.env.example` with `PROJECTS_DIR=./data/projects` and `TEMPLATES_DIR=./data/templates`, and add `data/` to `.gitignore`
 
 ## M1 · Domain Core (pure logic, unit-tested)
 - [ ] T1.1 `types.ts`: Project, DataTable, Template, Slide, SlideElement
