@@ -40,10 +40,10 @@ Ordered by milestone (see Implementation-Plan.md). A task is done when its code 
 - [x] T4.6 Tests: moving or resizing updates the coordinates, dropping a column removes it from the sidebar, and a template saved from project A loads in project B
 
 ## M5 · Presentation (completes P1 MVP)
-- [ ] T5.1 Template selector (Standard + every template in the Templates folder, default: Standard) + "New Presentation" button (asks for confirmation if slides already exist)
-- [ ] T5.2 `SlideGrid`: thumbnails + reorder with `@dnd-kit/sortable`
-- [ ] T5.3 `PresentationRunner`: Fullscreen API, ←/→/click navigation, Esc exits
-- [ ] T5.4 Tests: generating creates N slides for N visible rows, reordering changes the order, and keys change the slide
+- [x] T5.1 Template selector (Standard + every template in the Templates folder, default: Standard) + "New Presentation" button (asks for confirmation if slides already exist)
+- [x] T5.2 `SlideGrid`: thumbnails + reorder with `@dnd-kit/sortable`
+- [x] T5.3 `PresentationRunner`: Fullscreen API, ←/→/click navigation, Esc exits
+- [x] T5.4 Tests: generating creates N slides for N visible rows, reordering changes the order, and keys change the slide
 - [ ] T5.5 Manual end-to-end check: new project → `.md` import → template edit + save → generate → present → save → reload → second project uses the same template
 
 ## M6 · MVP Complete (P2)
