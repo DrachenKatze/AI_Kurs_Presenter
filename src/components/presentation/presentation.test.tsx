@@ -29,7 +29,6 @@ function Open() {
 }
 
 test("New Presentation creates one slide per visible row; Start is enabled afterwards", async () => {
-  vi.stubGlobal("fetch", vi.fn(async () => Response.json([])));
   render(
     <ProjectProvider>
       <Open />

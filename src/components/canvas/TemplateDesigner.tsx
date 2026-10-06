@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ListDialog } from "@/components/shell/ListDialog";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { fieldElement, missingColumns, unusedColumns } from "@/domain/template";
 import type { Template } from "@/domain/types";
@@ -18,6 +19,8 @@ export function TemplateDesigner() {
   const { state, dispatch } = useProject();
   const [picker, setPicker] = useState<ListItem[] | null>(null);
   const [message, setMessage] = useState("");
+  // Open "Save as" / overwrite dialog; `clash` is the saved template that already has this name.
+  const [dialog, setDialog] = useState<{ name: string; clash?: ListItem } | null>(null);
   const columns = state.project!.table.columns; // rendered only when a project is open
   const template = state.activeTemplate!;
   const missing = missingColumns(template, columns);
@@ -34,12 +37,22 @@ export function TemplateDesigner() {
     }
   };
 
-  const save = () =>
+  const store = async (t: Template) => {
+    setDialog(null);
+    setTemplate(t);
+    await saveTemplate(t);
+    return "Template saved";
+  };
+
+  // Saving under a name another saved template already has asks before overwriting it.
+  const save = (name: string, asNew: boolean) =>
     run(async () => {
-      const t = fork(template);
-      setTemplate(t);
-      await saveTemplate(t);
-      return "Template saved";
+      const t = { ...fork(template), name: name.trim() };
+      if (asNew) t.id = crypto.randomUUID();
+      const key = t.name.toLowerCase();
+      const clash = (await listTemplates()).find((i) => i.id !== t.id && i.name.trim().toLowerCase() === key);
+      if (clash) return setDialog({ name: t.name, clash });
+      return store(t);
     });
 
   return (
@@ -49,7 +62,8 @@ export function TemplateDesigner() {
           New template
         </Button>
         <Button onClick={() => run(async () => setPicker(await listTemplates()))}>Load template</Button>
-        <Button onClick={save}>Save template</Button>
+        <Button onClick={() => save(template.name, false)}>Save template</Button>
+        <Button onClick={() => setDialog({ name: template.name })}>Save as…</Button>
         <AddElementButtons onAdd={(el) => edit({ elements: [...template.elements, el] })} />
         <Input
           aria-label="Template name"
@@ -75,6 +89,45 @@ export function TemplateDesigner() {
           onAdd={(name) => edit({ elements: [...template.elements, fieldElement(name, 10, 10)] })}
         />
       </div>
+      <Dialog open={dialog !== null} onOpenChange={(open) => !open && setDialog(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{dialog?.clash ? "Overwrite template?" : "Save template as"}</DialogTitle>
+          </DialogHeader>
+          {dialog?.clash ? (
+            <>
+              <p>A template named &quot;{dialog.clash.name}&quot; already exists. Do you want to overwrite it?</p>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setDialog(null)}>
+                  No
+                </Button>
+                <Button onClick={() => run(() => store({ ...fork(template), id: dialog.clash!.id, name: dialog.name }))}>
+                  Yes
+                </Button>
+              </DialogFooter>
+            </>
+          ) : (
+            <form
+              className="flex flex-col gap-4"
+              onSubmit={(e) => {
+                e.preventDefault();
+                save(dialog!.name, true);
+              }}
+            >
+              <Input
+                aria-label="New template name"
+                value={dialog?.name ?? ""}
+                onChange={(e) => setDialog({ name: e.target.value })}
+              />
+              <DialogFooter>
+                <Button type="submit" disabled={!dialog?.name.trim()}>
+                  Save
+                </Button>
+              </DialogFooter>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
       <ListDialog
         title="Load template"
         items={picker}

@@ -82,6 +82,12 @@ The P1 slice alone delivers the core promise: *table in → presentation out*.
 - **Expected outcome:** Elements snap to the slide center and to the edges of other elements.
 - **Short description:** Snap lines shown while dragging.
 
+### C6 · Save Template As / Overwrite Warning — P2
+- **Feature name:** Save Template As
+- **User problem:** I want to save a variant of a template under a new name, and I don't want to overwrite another template by accident.
+- **Expected outcome:** "Save as…" asks for a name and saves a new template file. If the name (trimmed, case-insensitive) already belongs to another saved template, both Save and Save as ask "Overwrite template?". Yes overwrites that file, No goes back without saving.
+- **Short description:** Source: `documents/Fix/Save Template as new File.md`. The name check uses the Templates folder list, so no new API is needed.
+
 ---
 
 ## Epic D — Presentation

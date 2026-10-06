@@ -80,3 +80,49 @@ test("editing the standard template gives it its own id and name", async () => {
   fireEvent.keyDown(screen.getByLabelText("Template canvas"), { key: "Delete" });
   expect(screen.getByLabelText("Template name")).toHaveValue("My template");
 });
+
+describe("saving", () => {
+  let puts: string[] = [];
+  beforeEach(() => {
+    localStorage.setItem(
+      "presenter:template:old-id",
+      JSON.stringify({ version: 1, id: "old-id", name: "Lecture", elements: [] }),
+    );
+    puts = [];
+    vi.spyOn(Storage.prototype, "setItem").mockImplementation((key) => void puts.push(key));
+  });
+  afterEach(() => vi.restoreAllMocks());
+
+  const saveAs = async (name: string) => {
+    fireEvent.click(await screen.findByText("Save as…"));
+    fireEvent.change(screen.getByLabelText("New template name"), { target: { value: name } });
+    fireEvent.click(screen.getByText("Save"));
+  };
+
+  test("Save as with a new name writes a new file", async () => {
+    await saveAs("Fresh");
+    await screen.findByText("Template saved");
+    expect(puts).toHaveLength(1);
+    expect(puts[0]).not.toContain("old-id");
+    expect(screen.getByLabelText("Template name")).toHaveValue("Fresh");
+  });
+
+  test("an existing name asks first: No saves nothing, Yes overwrites that file", async () => {
+    await saveAs(" lecture ");
+    fireEvent.click(await screen.findByText("No"));
+    expect(screen.queryByText("Overwrite template?")).not.toBeInTheDocument();
+    expect(puts).toEqual([]);
+
+    await saveAs("Lecture");
+    fireEvent.click(await screen.findByText("Yes"));
+    await screen.findByText("Template saved");
+    expect(puts).toEqual(["presenter:template:old-id"]);
+  });
+
+  test("plain Save also warns when the name belongs to another template", async () => {
+    fireEvent.change(await screen.findByLabelText("Template name"), { target: { value: "Lecture" } });
+    fireEvent.click(screen.getByText("Save template"));
+    expect(await screen.findByText("Overwrite template?")).toBeInTheDocument();
+    expect(puts).toEqual([]);
+  });
+});

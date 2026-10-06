@@ -52,3 +52,4 @@ Ordered by milestone (see Implementation-Plan.md). A task is done when its code 
 - [x] T6.3 D4 Single Slide Editor: double-click a slide → dialog with `EditableCanvas` on the slide snapshot, plus that row's unmapped columns
 - [x] T6.4 D5 Add a text box and an image upload (PNG/JPG/SVG → data URL, warn if over 2 MB) in the slide editor and the template designer
 - [x] T6.5 Tests for each item above
+- [x] T6.6 C6 Template "Save as…" dialog (new ID + name) and an overwrite confirmation (Yes/No) when Save or Save as uses a name another saved template already has. Tests: a new name writes a new file, No saves nothing, Yes overwrites the existing file, plain Save also warns.

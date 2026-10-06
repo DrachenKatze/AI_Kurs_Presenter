@@ -37,7 +37,6 @@ const canvas = () => screen.getByLabelText("Template canvas");
 const elements = () => canvas().querySelectorAll("[aria-label^='Element']").length;
 
 async function openEditor(slide = 1) {
-  vi.stubGlobal("fetch", vi.fn(async () => Response.json([])));
   render(
     <ProjectProvider>
       <Open />

@@ -96,7 +96,7 @@ src/
 | M3 | Data View | B1, B2 | Edit the table and import/export `.md`. |
 | M4 | Template Designer | C1, C2, C3, C4 | Place, move, and resize column placeholders, then save and load templates in the shared folder. |
 | M5 | Presentation | D1, D2, D3 | Generate, reorder, and present fullscreen. **← end-to-end P1 MVP** |
-| M6 | MVP complete | B3, B4, D4, D5 | All P2 backlog items. |
+| M6 | MVP complete | B3, B4, D4, D5, C6 | All P2 backlog items. |
 
 Each milestone ends in a working app. Every component and domain module gets a test, following Development Strategie.md.
 
