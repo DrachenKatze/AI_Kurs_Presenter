@@ -43,7 +43,11 @@ export function TopBar() {
       <span role="status" className="text-sm text-muted-foreground">
         {message}
       </span>
-      <Button disabled className="ml-auto">
+      {/* Server and browser may disagree on "today" (timezone), so skip the hydration warning. */}
+      <time suppressHydrationWarning className="ml-auto text-sm text-muted-foreground">
+        {new Date().toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" })}
+      </time>
+      <Button disabled>
         Settings
       </Button>
 
