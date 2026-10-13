@@ -42,7 +42,10 @@ export function DataView() {
         <Button onClick={loadMd}>Load .md</Button>
         <Button
           disabled={table.columns.length === 0}
-          onClick={() => downloadFile(`${project.name || "list"}.md`, toMarkdownTable(table), "text/markdown")}
+          onClick={() => {
+            const name = window.prompt("File name", project.name || "list")?.trim();
+            if (name) downloadFile(name.endsWith(".md") ? name : `${name}.md`, toMarkdownTable(table), "text/markdown");
+          }}
         >
           Save .md
         </Button>
