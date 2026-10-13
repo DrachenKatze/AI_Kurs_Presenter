@@ -1,4 +1,4 @@
-import { parseProject, parseTemplate } from "@/domain/project";
+import { parseTemplate } from "@/domain/project";
 import type { Template } from "@/domain/types";
 
 export interface ListItem {
@@ -6,7 +6,8 @@ export interface ListItem {
   name: string;
 }
 
-// Projects and templates live in the browser's localStorage, one `presenter:<kind>:<id>` key per item.
+// Templates live in the browser's localStorage, one `presenter:<kind>:<id>` key per item.
+// Projects are saved as .json files on the user's machine instead (see TopBar).
 // ponytail: localStorage caps at ~5 MB per origin (uploaded images count); move to IndexedDB if users hit it
 function store<T extends { id: string; name: string }>(kind: string, parse: (json: string) => T) {
   const prefix = `presenter:${kind}:`;
@@ -36,12 +37,7 @@ function store<T extends { id: string; name: string }>(kind: string, parse: (jso
   };
 }
 
-const projects = store("project", parseProject);
 const templates = store("template", parseTemplate);
-
-export const listProjects = projects.list;
-export const loadProject = projects.load;
-export const saveProject = projects.save;
 
 export const listTemplates = templates.list;
 export const loadTemplate = templates.load;
