@@ -1,5 +1,5 @@
 import type { ComponentProps, HTMLAttributes, ReactNode } from "react";
-import type { SlideElement } from "@/domain/types";
+import type { SlideElement, TextStyle } from "@/domain/types";
 import { cn } from "@/lib/utils";
 
 interface Props extends ComponentProps<"div"> {
@@ -8,6 +8,14 @@ interface Props extends ComponentProps<"div"> {
   elementProps?: (e: SlideElement) => HTMLAttributes<HTMLDivElement>;
   /** Extra content per element, outside its clipped area (resize handle, warnings). */
   overlay?: (e: SlideElement) => ReactNode;
+}
+
+// In cqw like the font size, so effects scale with the slide
+function textShadow(s?: TextStyle) {
+  const c = s?.effectColor ?? "#888888";
+  if (s?.effect === "shadow") return `0.2cqw 0.2cqw 0.3cqw ${c}`;
+  if (s?.effect === "glow") return `0 0 0.5cqw ${c}, 0 0 1cqw ${c}`;
+  return undefined;
 }
 
 /** Draws elements in percent on a 16:9 box. Shared by thumbnails, the editors and the fullscreen runner. */
@@ -37,6 +45,10 @@ export function SlideRenderer({ elements, elementProps, overlay, className, ...r
               style={{
                 fontSize: `${(s?.fontSize ?? 24) / 10}cqw`,
                 fontWeight: s?.bold ? 700 : 400,
+                fontStyle: s?.italic ? "italic" : undefined,
+                fontFamily: s?.font,
+                color: s?.color,
+                textShadow: textShadow(s),
                 textAlign: s?.align ?? "left",
               }}
             >

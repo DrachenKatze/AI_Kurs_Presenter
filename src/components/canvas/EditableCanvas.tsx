@@ -8,6 +8,7 @@ import { fieldElement } from "@/domain/template";
 import type { SlideElement } from "@/domain/types";
 import { cn } from "@/lib/utils";
 import { SlideRenderer } from "./SlideRenderer";
+import { TextStyleBar } from "./TextStyleBar";
 
 export const COLUMN_MIME = "application/x-column";
 const ROTATE_STEP = 15; // degrees per Rotate click
@@ -119,6 +120,7 @@ export function EditableCanvas({ elements, onChange, missing = [] }: Props) {
           Rotate right
         </Button>
       </div>
+      {sel && sel.kind !== "image" && <TextStyleBar element={sel} onChange={(style) => patch(sel.id, { style })} />}
       <SlideRenderer
         ref={box}
         elements={elements}

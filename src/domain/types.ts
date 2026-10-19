@@ -29,7 +29,18 @@ export interface SlideElement {
   columnName?: string; // kind = 'field'; matched by name so templates work across projects
   text?: string; // kind = 'text', or the resolved value in a slide snapshot
   src?: string; // kind = 'image' (data URL)
-  style?: { fontSize: number; bold?: boolean; align?: "left" | "center" | "right" };
+  style?: TextStyle;
+}
+
+export interface TextStyle {
+  fontSize: number;
+  bold?: boolean;
+  italic?: boolean;
+  align?: "left" | "center" | "right";
+  color?: string; // CSS colour, default black
+  font?: string; // font family, default the app font
+  effect?: "shadow" | "glow";
+  effectColor?: string;
 }
 
 export interface Slide {

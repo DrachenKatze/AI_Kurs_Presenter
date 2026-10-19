@@ -88,6 +88,24 @@ test("layer order and rotation of the selected element", async () => {
   expect(screen.getByLabelText("Element Title").style.transform).toBe("");
 });
 
+test("text style of the selected element", async () => {
+  await openEditor();
+  expect(screen.queryByLabelText("Text style")).not.toBeInTheDocument();
+  fireEvent.pointerDown(screen.getByLabelText("Element Title"), { pointerId: 1 });
+  const text = () => screen.getByLabelText("Element Title").firstElementChild as HTMLElement;
+
+  fireEvent.change(screen.getByLabelText("Color"), { target: { value: "#ff0000" } });
+  fireEvent.change(screen.getByLabelText("Size"), { target: { value: "40" } });
+  await userEvent.selectOptions(screen.getByLabelText("Font"), "Georgia");
+  await userEvent.click(screen.getByRole("button", { name: "Bold" }));
+  await userEvent.click(screen.getByRole("button", { name: "Italic" }));
+  await userEvent.selectOptions(screen.getByLabelText("Effect"), "glow");
+  fireEvent.change(screen.getByLabelText("Effect color"), { target: { value: "#00ff00" } });
+
+  expect(text().style).toMatchObject({ color: "rgb(255, 0, 0)", fontSize: "4cqw", fontFamily: "Georgia", fontWeight: "700", fontStyle: "italic" });
+  expect(text().style.textShadow).toContain("#00ff00");
+});
+
 test("add a text box and edit its text", async () => {
   await openEditor();
   const before = elements();
