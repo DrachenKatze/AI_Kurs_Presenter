@@ -163,3 +163,29 @@ test("add an image; images over 2 MB ask first", async () => {
   expect(confirm).toHaveBeenCalledOnce();
   expect(elements()).toBe(before + 1); // declined: not added
 });
+
+test("timer of one slide: seconds, visibility, style with gradient", async () => {
+  await openEditor();
+  expect(screen.queryByLabelText("Timer seconds")).not.toBeInTheDocument(); // no timer set yet
+  await userEvent.click(screen.getByRole("button", { name: "Close" }));
+  await userEvent.click(screen.getByRole("button", { name: "Add Timer" }));
+  await userEvent.dblClick(screen.getByLabelText("Slide 1"));
+
+  fireEvent.change(screen.getByLabelText("Timer seconds"), { target: { value: "7" } });
+  expect(screen.queryByLabelText("Element timer")).not.toBeInTheDocument();
+  await userEvent.click(screen.getByLabelText("Timer visible"));
+  expect(screen.getByLabelText("Element timer")).toHaveTextContent("7");
+
+  fireEvent.pointerDown(screen.getByLabelText("Element timer"), { pointerId: 1 });
+  expect(screen.getByRole("button", { name: "Bring forward" })).toBeDisabled(); // always in front
+  expect(screen.queryByLabelText("Text style")).not.toBeInTheDocument();
+  await userEvent.click(screen.getByRole("button", { name: "Style" }));
+  await userEvent.selectOptions(screen.getByLabelText("Fill"), "gradient");
+  await userEvent.selectOptions(screen.getByLabelText("Effect"), "glow");
+  const timer = screen.getByLabelText("Element timer").firstElementChild as HTMLElement;
+  expect(timer.style.backgroundImage).toContain("linear-gradient(90deg");
+  expect(timer.style.filter).toContain("drop-shadow");
+
+  await userEvent.keyboard("{Escape}");
+  expect(screen.getByLabelText("Slide 2")).not.toHaveTextContent("7"); // other slides keep 10
+});

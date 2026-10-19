@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { generateSlides } from "@/domain/presentation";
 import { standardTemplate } from "@/domain/template";
+import { DEFAULT_TIMER_SECONDS, individualTimers, removeTimer, setTimer } from "@/domain/timer";
 import type { Slide } from "@/domain/types";
 import { useProject } from "@/state/ProjectContext";
 import { PresentationRunner } from "./PresentationRunner";
@@ -14,6 +15,8 @@ export function PresentationView() {
   const { state, dispatch } = useProject();
   const [running, setRunning] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [seconds, setSeconds] = useState(DEFAULT_TIMER_SECONDS);
+  const [timerVisible, setTimerVisible] = useState(false);
   const project = state.project!; // rendered only when a project is open
   const { slides } = project.presentation;
   // Templates are local files: the choice is Standard or the one open in the Template Designer.
@@ -27,6 +30,12 @@ export function PresentationView() {
     if (slides.length > 0 && !window.confirm("Replace the existing slides?")) return;
     const template = active && templateId === active.id ? active : standardTemplate(project.table.columns);
     update({ slides: generateSlides(project.table, template) });
+  };
+
+  const addTimer = () => {
+    const n = individualTimers(slides, seconds, timerVisible);
+    if (n > 0 && !window.confirm(`${n} slide(s) have their own timer settings. Overwrite them?`)) return;
+    update({ slides: slides.map((s) => setTimer(s, seconds, timerVisible)) });
   };
 
   return (
@@ -46,6 +55,30 @@ export function PresentationView() {
         <Button onClick={generate}>New Presentation</Button>
         <Button variant="outline" disabled={slides.length === 0} onClick={() => setRunning(true)}>
           Start Presentation
+        </Button>
+        <label className="flex items-center gap-2 text-sm">
+          Seconds
+          <input
+            type="number"
+            min={1}
+            className="h-8 w-16 rounded-lg border bg-background px-2"
+            value={seconds}
+            onChange={(e) => setSeconds(Math.max(1, Math.round(Number(e.target.value)) || 1))}
+          />
+        </label>
+        <label className="flex items-center gap-2 text-sm">
+          <input type="checkbox" checked={timerVisible} onChange={(e) => setTimerVisible(e.target.checked)} />
+          Visible
+        </label>
+        <Button variant="outline" disabled={slides.length === 0} onClick={addTimer}>
+          Add Timer
+        </Button>
+        <Button
+          variant="outline"
+          disabled={!slides.some((s) => s.timer !== undefined)}
+          onClick={() => update({ slides: slides.map(removeTimer) })}
+        >
+          Remove Timer
         </Button>
       </div>
       {slides.length === 0 ? (

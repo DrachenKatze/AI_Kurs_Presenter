@@ -4,13 +4,28 @@ import { useEffect, useRef, useState } from "react";
 import { SlideRenderer } from "@/components/canvas/SlideRenderer";
 import type { Slide } from "@/domain/types";
 
-/** Borderless fullscreen runner: ←/→ or click to navigate, Esc to leave. */
+/** Borderless fullscreen runner: ←/→ or click to navigate, Esc to leave. Slides with a timer move on when it reaches 0. */
 export function PresentationRunner({ slides, onExit }: { slides: Slide[]; onExit: () => void }) {
   const [index, setIndex] = useState(0);
+  const [left, setLeft] = useState(slides[0].timer); // seconds left on this slide
   const root = useRef<HTMLDivElement>(null);
   const exit = useRef(onExit);
 
-  const go = (delta: number) => setIndex((i) => Math.min(Math.max(i + delta, 0), slides.length - 1));
+  const go = (delta: number) => {
+    const next = Math.min(Math.max(index + delta, 0), slides.length - 1);
+    setIndex(next);
+    setLeft(slides[next].timer); // every visit starts the countdown again
+  };
+
+  useEffect(() => {
+    if (!left) return; // no timer, or the last slide ran out and stays at 0
+    const t = setTimeout(() => {
+      if (left > 1 || index === slides.length - 1) return setLeft(left - 1);
+      setIndex(index + 1);
+      setLeft(slides[index + 1].timer);
+    }, 1000);
+    return () => clearTimeout(t);
+  }, [left, index, slides]);
 
   useEffect(() => {
     exit.current = onExit;
@@ -46,6 +61,7 @@ export function PresentationRunner({ slides, onExit }: { slides: Slide[]; onExit
       <SlideRenderer
         elements={slides[index].elements}
         background={slides[index].background}
+        timer={left}
         className="w-[min(100vw,calc(100vh*16/9))]"
         aria-label={`Slide ${index + 1} of ${slides.length}`}
       />

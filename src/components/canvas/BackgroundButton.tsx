@@ -7,7 +7,7 @@ import type { Background } from "@/domain/types";
 import { pickCheckedImage } from "./AddElementButtons";
 import { SlideRenderer } from "./SlideRenderer";
 
-const DIRECTIONS = [
+export const DIRECTIONS = [
   { label: "Left to right", angle: 90 },
   { label: "Right to left", angle: 270 },
   { label: "Top to bottom", angle: 180 },

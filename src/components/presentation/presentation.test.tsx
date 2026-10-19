@@ -1,10 +1,11 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useEffect } from "react";
 import { createProject } from "@/domain/project";
 import { moveById } from "@/domain/order";
 import { generateSlides } from "@/domain/presentation";
 import { standardTemplate } from "@/domain/template";
+import { setTimer } from "@/domain/timer";
 import type { DataTable } from "@/domain/types";
 import { ProjectProvider, useProject } from "@/state/ProjectContext";
 import { PresentationRunner } from "./PresentationRunner";
@@ -75,4 +76,50 @@ test("runner: arrow keys and click change the slide, Esc exits", () => {
 
   fireEvent.keyDown(runner, { key: "Escape" });
   expect(onExit).toHaveBeenCalledOnce();
+});
+
+test("runner: a timer counts down and moves on at 0, hidden or visible; the last slide stays", () => {
+  vi.useFakeTimers();
+  const [a, b, c] = generateSlides(table, standardTemplate(table.columns));
+  const slides = [setTimer(a, 2, true), setTimer(b, 1, false), c];
+  render(<PresentationRunner slides={slides} onExit={() => {}} />);
+  const shown = () => screen.getByRole("dialog").textContent;
+
+  expect(shown()).toBe("One2");
+  act(() => vi.advanceTimersByTime(1000));
+  expect(shown()).toBe("One1");
+  act(() => vi.advanceTimersByTime(1000));
+  expect(shown()).toBe("Two"); // hidden timer, still runs
+  act(() => vi.advanceTimersByTime(1000));
+  expect(shown()).toBe("Three");
+  act(() => vi.advanceTimersByTime(5000));
+  expect(shown()).toBe("Three");
+  vi.useRealTimers();
+});
+
+test("Add Timer sets every slide, warns before overwriting own settings; Remove Timer clears them", async () => {
+  render(
+    <ProjectProvider>
+      <Open />
+    </ProjectProvider>,
+  );
+  await userEvent.click(await screen.findByRole("button", { name: "New Presentation" }));
+  const remove = screen.getByRole("button", { name: "Remove Timer" });
+  expect(remove).toBeDisabled();
+  expect(screen.getByLabelText("Seconds")).toHaveValue(10);
+  expect(screen.getByLabelText("Visible")).not.toBeChecked();
+
+  await userEvent.click(screen.getByLabelText("Visible"));
+  await userEvent.click(screen.getByRole("button", { name: "Add Timer" }));
+  expect(screen.getAllByLabelText(/^Slide \d$/).every((s) => s.textContent?.includes("10"))).toBe(true);
+
+  const confirm = vi.spyOn(window, "confirm").mockReturnValue(false);
+  fireEvent.change(screen.getByLabelText("Seconds"), { target: { value: "5" } });
+  await userEvent.click(screen.getByRole("button", { name: "Add Timer" }));
+  expect(confirm).toHaveBeenCalledOnce();
+  expect(screen.getByLabelText("Slide 1")).toHaveTextContent("10"); // declined
+
+  await userEvent.click(remove);
+  expect(screen.getByLabelText("Slide 1")).not.toHaveTextContent("10");
+  expect(remove).toBeDisabled();
 });

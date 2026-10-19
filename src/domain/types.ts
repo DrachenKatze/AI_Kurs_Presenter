@@ -16,7 +16,7 @@ export interface DataTable {
   rows: Row[];
 }
 
-export type ElementKind = "field" | "text" | "image";
+export type ElementKind = "field" | "text" | "image" | "timer"; // timer: the countdown of its slide, always in front
 
 export interface SlideElement {
   id: Id;
@@ -41,6 +41,7 @@ export interface TextStyle {
   font?: string; // font family, default the app font
   effect?: "shadow" | "glow";
   effectColor?: string;
+  gradient?: { from: string; to: string; angle: number }; // fills the letters instead of color
 }
 
 export interface Slide {
@@ -48,6 +49,7 @@ export interface Slide {
   rowId: Id;
   elements: SlideElement[]; // fixed snapshot
   background?: Background;
+  timer?: number; // seconds until the runner moves on; shown only if the slide has a timer element
 }
 
 export type Background =
