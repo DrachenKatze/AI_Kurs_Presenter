@@ -127,6 +127,11 @@ describe("template + presentation", () => {
     expect(slides[0].elements[0].id).not.toBe(slides[1].elements[0].id);
   });
 
+  test("generateSlides: copies the template background", () => {
+    const tpl = { ...standardTemplate(table.columns), background: { kind: "color" as const, color: "#ff0000" } };
+    expect(generateSlides(table, tpl).every((s) => s.background === tpl.background)).toBe(true);
+  });
+
   test("generateSlides: missing column gives empty text", () => {
     const tpl = standardTemplate([...table.columns, { id: "x", name: "Ghost" }]);
     expect(generateSlides(table, tpl)[0].elements[2].text).toBe("");

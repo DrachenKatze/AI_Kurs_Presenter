@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { moveElement, resizeElement, snapMove, snapResize } from "@/domain/geometry";
 import { shiftById } from "@/domain/order";
 import { fieldElement } from "@/domain/template";
-import type { SlideElement } from "@/domain/types";
+import type { Background, SlideElement } from "@/domain/types";
 import { cn } from "@/lib/utils";
 import { SlideRenderer } from "./SlideRenderer";
 import { TextStyleBar } from "./TextStyleBar";
@@ -24,6 +24,7 @@ const readSnap = () => {
 
 interface Props {
   elements: SlideElement[];
+  background?: Background;
   onChange: (elements: SlideElement[]) => void;
   /** Column names that no longer exist; their placeholders get a warning marker. */
   missing?: string[];
@@ -38,7 +39,7 @@ interface Drag {
 }
 
 /** Select, drag to move, corner-resize and Delete. Dropping a column from the sidebar adds a field. */
-export function EditableCanvas({ elements, onChange, missing = [] }: Props) {
+export function EditableCanvas({ elements, background, onChange, missing = [] }: Props) {
   const [selected, setSelected] = useState<string | null>(null);
   const [snap, setSnap] = useState(readSnap);
   const box = useRef<HTMLDivElement>(null);
@@ -124,6 +125,7 @@ export function EditableCanvas({ elements, onChange, missing = [] }: Props) {
       <SlideRenderer
         ref={box}
         elements={elements}
+        background={background}
         tabIndex={0}
         aria-label="Template canvas"
         className="border outline-none focus-visible:ring-2 focus-visible:ring-ring"

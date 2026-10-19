@@ -106,6 +106,36 @@ test("text style of the selected element", async () => {
   expect(text().style.textShadow).toContain("#00ff00");
 });
 
+test("background: color, gradient, picture, remove", async () => {
+  await openEditor();
+  const bg = () => canvas().style.background;
+  const open = () => userEvent.click(screen.getByRole("button", { name: "Add background" }));
+
+  await open();
+  fireEvent.change(screen.getByLabelText("Background color"), { target: { value: "#ff0000" } });
+  await userEvent.click(screen.getByRole("button", { name: "Apply" }));
+  expect(bg()).toContain("rgb(255, 0, 0)");
+  expect(screen.getByLabelText("Slide 1").firstElementChild).toHaveStyle({ background: "rgb(255, 0, 0)" }); // thumbnail too
+
+  await open();
+  await userEvent.click(screen.getByRole("radio", { name: "Gradient" }));
+  await userEvent.selectOptions(screen.getByLabelText("Direction"), "Top to bottom");
+  await userEvent.click(screen.getByRole("button", { name: "Apply" }));
+  expect(bg()).toContain("linear-gradient(180deg");
+
+  await open();
+  await userEvent.click(screen.getByRole("radio", { name: "Picture" }));
+  expect(screen.getByRole("button", { name: "Apply" })).toBeDisabled();
+  vi.mocked(pickImage).mockResolvedValueOnce({ src: "data:image/png;base64,AAAA", size: 100 });
+  await userEvent.click(screen.getByRole("button", { name: "Choose picture" }));
+  await userEvent.click(screen.getByRole("button", { name: "Apply" }));
+  expect(bg()).toContain("data:image/png;base64,AAAA");
+
+  await open();
+  await userEvent.click(screen.getByRole("button", { name: "Remove background" }));
+  expect(bg()).toBe("");
+});
+
 test("add a text box and edit its text", async () => {
   await openEditor();
   const before = elements();

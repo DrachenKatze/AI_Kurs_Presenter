@@ -10,6 +10,7 @@ import type { Template } from "@/domain/types";
 import { fileExists, pickFile, saveFile } from "@/lib/files";
 import { useProject } from "@/state/ProjectContext";
 import { AddElementButtons } from "./AddElementButtons";
+import { BackgroundButton } from "./BackgroundButton";
 import { EditableCanvas } from "./EditableCanvas";
 import { UnusedColumnsSidebar } from "./UnusedColumnsSidebar";
 
@@ -67,6 +68,7 @@ export function TemplateDesigner() {
         <Button onClick={() => run(load)}>Load template</Button>
         <Button onClick={() => setDialog({ name: template.name })}>Save template</Button>
         <AddElementButtons onAdd={(el) => edit({ elements: [...template.elements, el] })} />
+        <BackgroundButton value={template.background} onChange={(background) => edit({ background })} />
         <Input
           aria-label="Template name"
           className="w-56"
@@ -84,7 +86,7 @@ export function TemplateDesigner() {
       )}
       <div className="flex items-start gap-4">
         <div className="min-w-0 flex-1">
-          <EditableCanvas elements={template.elements} missing={missing} onChange={(elements) => edit({ elements })} />
+          <EditableCanvas elements={template.elements} background={template.background} missing={missing} onChange={(elements) => edit({ elements })} />
         </div>
         <UnusedColumnsSidebar
           columns={unusedColumns(template, columns)}

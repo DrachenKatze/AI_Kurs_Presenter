@@ -47,7 +47,13 @@ export interface Slide {
   id: Id;
   rowId: Id;
   elements: SlideElement[]; // fixed snapshot
+  background?: Background;
 }
+
+export type Background =
+  | { kind: "color"; color: string }
+  | { kind: "gradient"; from: string; to: string; angle: number } // CSS angle, 90 = left to right
+  | { kind: "image"; src: string }; // data URL, covers the slide
 
 export interface Project {
   version: 1;
@@ -62,4 +68,5 @@ export interface Template {
   id: Id;
   name: string;
   elements: SlideElement[];
+  background?: Background; // copied to every generated slide
 }
