@@ -1,21 +1,29 @@
-![[blessing-32x.png]]
 
-**Color Scheme**
-1. **Gedämpftes Lila / Violett** (Butten Pressed)
-    - **HEX:** `#6f5993`
-    - **RGB:** `(111, 89, 147)`
-2. **Mintgrün** (Button)
-    - **HEX:** `#96f6cb`
-    - **RGB:** `(150, 246, 203)`
-3. **Hellgelb**
-    - **HEX:** `#ffffb1`
-    - **RGB:** `(255, 255, 177)`
-4. **Hellrosa**
-    - **HEX:** `#ffb8d1`
-    - **RGB:** `(255, 184, 209)`
-5. **Flieder / Hellviolett** (Tab Color)
-    - **HEX:** `#d6c5e3`
-    - **RGB:** `(214, 197, 227`)
+## Design Scheme
+
+**Scheme : Night Fox**
+Header - RGB: (88, 44, 131)
+Button - RGB: (211, 161, 250)
+Butten Pressed - RGB: (134, 68, 193)
+Tab Color - RGB: (214, 197, 227)
+
+**Scheme : Green Woods**
+Header - RGB: (11, 156, 91)
+Button - RGB: (150, 246, 203)
+Butten Pressed - RGB: (96, 235, 173)
+Tab Color - RGB: (215, 247, 233) 
+
+**Scheme :  Classic**
+Header - RGB: (82, 101, 105)
+Button - RGB: (140, 177, 186)
+Butten Pressed - RGB: (110, 139, 145)
+Tab Color - RGB: (184, 207, 212) 
+
+**Scheme :  Historical**
+Header - RGB: (191, 180, 157)
+Button - RGB: (232, 185, 86)
+Butten Pressed - RGB: (171, 140, 75)
+Tab Color - RGB: (181, 171, 150) 
 
 ## Programm-Design
 ### Core Shell & Project State (Foundation)

@@ -37,6 +37,8 @@
   --color-primary: var(--primary);
   --color-primary-pressed: var(--primary-pressed);
   --color-tab: var(--tab);
+  --color-header: var(--header);
+  --color-header-foreground: var(--header-foreground);
   --color-accent-yellow: var(--accent-yellow);
   --color-accent-pink: var(--accent-pink);
   --color-popover-foreground: var(--popover-foreground);
@@ -59,7 +61,7 @@
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: #96f6cb;
+  --primary: rgb(211, 161, 250);
   --primary-foreground: #1f1633;
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
@@ -77,8 +79,11 @@
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
   --radius: 0.625rem;
-  --primary-pressed: #6f5993;
-  --tab: #d6c5e3;
+  /* Design schemes from Design.md; :root is the default, Night Fox. */
+  --primary-pressed: rgb(134, 68, 193);
+  --tab: rgb(214, 197, 227);
+  --header: rgb(88, 44, 131);
+  --header-foreground: #fff;
   --accent-yellow: #ffffb1;
   --accent-pink: #ffb8d1;
   --sidebar: oklch(0.985 0 0);
@@ -89,6 +94,28 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+}
+
+[data-theme="green-woods"] {
+  --primary: rgb(150, 246, 203);
+  --primary-pressed: rgb(96, 235, 173);
+  --tab: rgb(215, 247, 233);
+  --header: rgb(11, 156, 91);
+}
+
+[data-theme="classic"] {
+  --primary: rgb(140, 177, 186);
+  --primary-pressed: rgb(110, 139, 145);
+  --tab: rgb(184, 207, 212);
+  --header: rgb(82, 101, 105);
+}
+
+[data-theme="historical"] {
+  --primary: rgb(232, 185, 86);
+  --primary-pressed: rgb(171, 140, 75);
+  --tab: rgb(181, 171, 150);
+  --header: rgb(191, 180, 157);
+  --header-foreground: #1f1633;
 }
 
 .dark {

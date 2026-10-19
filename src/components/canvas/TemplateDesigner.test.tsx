@@ -75,54 +75,74 @@ test("Delete frees the column, dropping it on the canvas takes it from the sideb
   expect(sidebar).toHaveTextContent("All columns are on the slide.");
 });
 
+test("with Snap on, a small move snaps back onto the other element's edge, and the choice is remembered", async () => {
+  fireEvent.click(await screen.findByLabelText("Snap to elements"));
+  expect(localStorage.getItem("presenter:snap")).toBe("1");
+
+  const title = screen.getByLabelText("Element Title"); // x 5, same left edge as Body
+  fireEvent.pointerDown(title, { clientX: 100, clientY: 100, pointerId: 1 });
+  fireEvent.pointerMove(title, { clientX: 110, clientY: 100, pointerId: 1 }); // +1% x
+  fireEvent.pointerUp(title, { pointerId: 1 });
+  expect(left(screen.getByLabelText("Element Title"))).toBe(5);
+  localStorage.removeItem("presenter:snap");
+});
+
 test("editing the standard template gives it its own id and name", async () => {
   fireEvent.pointerDown(await screen.findByLabelText("Element Body"), { clientX: 0, clientY: 0, pointerId: 1 });
   fireEvent.keyDown(screen.getByLabelText("Template canvas"), { key: "Delete" });
   expect(screen.getByLabelText("Template name")).toHaveValue("My template");
 });
 
-describe("saving", () => {
-  let puts: string[] = [];
-  beforeEach(() => {
-    localStorage.setItem(
-      "presenter:template:old-id",
-      JSON.stringify({ version: 1, id: "old-id", name: "Lecture", elements: [] }),
-    );
-    puts = [];
-    vi.spyOn(Storage.prototype, "setItem").mockImplementation((key) => void puts.push(key));
+describe("saving and loading local files", () => {
+  let saved: string[] = [];
+  beforeEach(async () => {
+    const files = await import("@/lib/files");
+    saved = [];
+    // the save folder already holds Lecture.template.json
+    vi.spyOn(files, "fileExists").mockImplementation(async (name) => name === "Lecture.template.json");
+    vi.spyOn(files, "saveFile").mockImplementation(async (name, _content, _type, kind) => {
+      saved.push(`${kind}/${name}`);
+      return "Saved";
+    });
   });
   afterEach(() => vi.restoreAllMocks());
 
   const saveAs = async (name: string) => {
-    fireEvent.click(await screen.findByText("Save as…"));
+    fireEvent.click(await screen.findByText("Save template"));
     fireEvent.change(screen.getByLabelText("New template name"), { target: { value: name } });
     fireEvent.click(screen.getByText("Save"));
   };
 
   test("Save as with a new name writes a new file", async () => {
     await saveAs("Fresh");
-    await screen.findByText("Template saved");
-    expect(puts).toHaveLength(1);
-    expect(puts[0]).not.toContain("old-id");
+    await screen.findByText("Saved");
+    expect(saved).toEqual(["Templates/Fresh.template.json"]);
     expect(screen.getByLabelText("Template name")).toHaveValue("Fresh");
   });
 
-  test("an existing name asks first: No saves nothing, Yes overwrites that file", async () => {
-    await saveAs(" lecture ");
+  test("Save as onto an existing file asks first: No saves nothing, Yes overwrites it", async () => {
+    await saveAs(" Lecture ");
     fireEvent.click(await screen.findByText("No"));
     expect(screen.queryByText("Overwrite template?")).not.toBeInTheDocument();
-    expect(puts).toEqual([]);
+    expect(saved).toEqual([]);
 
     await saveAs("Lecture");
     fireEvent.click(await screen.findByText("Yes"));
-    await screen.findByText("Template saved");
-    expect(puts).toEqual(["presenter:template:old-id"]);
+    await screen.findByText("Saved");
+    expect(saved).toEqual(["Templates/Lecture.template.json"]);
   });
 
-  test("plain Save also warns when the name belongs to another template", async () => {
-    fireEvent.change(await screen.findByLabelText("Template name"), { target: { value: "Lecture" } });
-    fireEvent.click(screen.getByText("Save template"));
-    expect(await screen.findByText("Overwrite template?")).toBeInTheDocument();
-    expect(puts).toEqual([]);
+  test("there is a single save button", async () => {
+    await screen.findByText("Save template");
+    expect(screen.queryByText("Save as…")).not.toBeInTheDocument();
+  });
+
+  test("Load template opens a picked file", async () => {
+    const files = await import("@/lib/files");
+    vi.spyOn(files, "pickFile").mockResolvedValue(
+      JSON.stringify({ version: 1, id: "t1", name: "From disk", elements: [] }),
+    );
+    fireEvent.click(await screen.findByText("Load template"));
+    expect(await screen.findByDisplayValue("From disk")).toBeInTheDocument();
   });
 });

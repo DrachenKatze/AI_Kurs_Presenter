@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { parseMarkdownTable, toMarkdownTable } from "@/domain/markdownTable";
 import { addColumn, addRow } from "@/domain/table";
 import type { DataTable as Table } from "@/domain/types";
-import { downloadFile, pickFile } from "@/lib/files";
+import { pickFile, saveFile } from "@/lib/files";
 import { useProject } from "@/state/ProjectContext";
 import { DataTable } from "./DataTable";
 
@@ -44,7 +44,10 @@ export function DataView() {
           disabled={table.columns.length === 0}
           onClick={() => {
             const name = window.prompt("File name", project.name || "list")?.trim();
-            if (name) downloadFile(name.endsWith(".md") ? name : `${name}.md`, toMarkdownTable(table), "text/markdown");
+            if (name)
+              saveFile(name.endsWith(".md") ? name : `${name}.md`, toMarkdownTable(table), "text/markdown", "Table").catch((e) =>
+                setError((e as Error).message),
+              );
           }}
         >
           Save .md

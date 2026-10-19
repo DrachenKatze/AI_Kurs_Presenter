@@ -4,8 +4,9 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { createProject, parseProject } from "@/domain/project";
-import { downloadFile, pickFile } from "@/lib/files";
+import { pickFile, saveFile } from "@/lib/files";
 import { useProject } from "@/state/ProjectContext";
+import { SettingsDialog } from "./SettingsDialog";
 
 export function TopBar() {
   const { state, dispatch } = useProject();
@@ -26,14 +27,13 @@ export function TopBar() {
     if (json !== null) dispatch({ type: "open", project: parseProject(json) });
   };
 
-  const save = async () => {
+  const save = () => {
     const p = state.project!;
-    downloadFile(`${p.name || "project"}.json`, JSON.stringify(p), "application/json");
-    return "Saved";
+    return saveFile(`${p.name || "project"}.json`, JSON.stringify(p), "application/json", "Project");
   };
 
   return (
-    <header className="flex items-center gap-2 border-b bg-[#6f5993] p-3 text-white">
+    <header className="flex items-center gap-2 border-b bg-header p-3 text-header-foreground">
       <Button onClick={() => dispatch({ type: "open", project: createProject("New Project") })}>New</Button>
       <Button onClick={() => run(load)}>Load</Button>
       <Button disabled={!state.project} onClick={() => run(save)}>
@@ -54,9 +54,7 @@ export function TopBar() {
       <time suppressHydrationWarning className="ml-auto text-sm">
         {new Date().toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" })}
       </time>
-      <Button disabled>
-        Settings
-      </Button>
+      <SettingsDialog />
     </header>
   );
 }
