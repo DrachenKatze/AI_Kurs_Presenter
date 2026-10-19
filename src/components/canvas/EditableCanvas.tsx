@@ -1,13 +1,22 @@
 "use client";
 
 import { useRef, useState, type DragEvent, type KeyboardEvent, type PointerEvent } from "react";
-import { moveElement, resizeElement } from "@/domain/geometry";
+import { moveElement, resizeElement, snapMove, snapResize } from "@/domain/geometry";
 import { fieldElement } from "@/domain/template";
 import type { SlideElement } from "@/domain/types";
 import { cn } from "@/lib/utils";
 import { SlideRenderer } from "./SlideRenderer";
 
 export const COLUMN_MIME = "application/x-column";
+const SNAP_KEY = "presenter:snap"; // shared by the Template Designer and the Slide Editor
+
+const readSnap = () => {
+  try {
+    return localStorage.getItem(SNAP_KEY) === "1";
+  } catch {
+    return false;
+  }
+};
 
 interface Props {
   elements: SlideElement[];
@@ -27,6 +36,7 @@ interface Drag {
 /** Select, drag to move, corner-resize and Delete. Dropping a column from the sidebar adds a field. */
 export function EditableCanvas({ elements, onChange, missing = [] }: Props) {
   const [selected, setSelected] = useState<string | null>(null);
+  const [snap, setSnap] = useState(readSnap);
   const box = useRef<HTMLDivElement>(null);
   const drag = useRef<Drag | null>(null);
 
@@ -47,7 +57,21 @@ export function EditableCanvas({ elements, onChange, missing = [] }: Props) {
     if (!d || !rect?.width) return;
     const dx = ((ev.clientX - d.startX) / rect.width) * 100;
     const dy = ((ev.clientY - d.startY) / rect.height) * 100;
-    patch(d.id, d.mode === "move" ? moveElement(d.orig, dx, dy) : resizeElement(d.orig, dx, dy));
+    const others = elements.filter((e) => e.id !== d.id);
+    if (d.mode === "move") {
+      const p = moveElement(d.orig, dx, dy);
+      patch(d.id, snap ? snapMove({ ...d.orig, ...p }, others) : p);
+    } else {
+      const s = resizeElement(d.orig, dx, dy);
+      patch(d.id, snap ? snapResize({ ...d.orig, ...s }, others) : s);
+    }
+  };
+
+  const toggleSnap = (on: boolean) => {
+    setSnap(on);
+    try {
+      localStorage.setItem(SNAP_KEY, on ? "1" : "0");
+    } catch {}
   };
 
   const drop = (ev: DragEvent) => {
@@ -68,49 +92,55 @@ export function EditableCanvas({ elements, onChange, missing = [] }: Props) {
   };
 
   return (
-    <SlideRenderer
-      ref={box}
-      elements={elements}
-      tabIndex={0}
-      aria-label="Template canvas"
-      className="border outline-none focus-visible:ring-2 focus-visible:ring-ring"
-      onKeyDown={keyDown}
-      onPointerMove={move}
-      onPointerUp={() => (drag.current = null)}
-      onPointerDown={() => setSelected(null)}
-      onDragOver={(ev) => ev.preventDefault()}
-      onDrop={drop}
-      elementProps={(e) => ({
-        "aria-label": `Element ${e.columnName ?? e.kind}`,
-        className: cn(
-          "cursor-move touch-none",
-          e.id === selected ? "outline outline-2 outline-primary-pressed" : "outline outline-1 outline-dashed outline-black/20",
-          e.columnName && missing.includes(e.columnName) && "bg-accent-yellow",
-        ),
-        onPointerDown: (ev) => start("move", e, ev),
-        onDoubleClick: () => {
-          if (e.kind !== "text") return;
-          // ponytail: window.prompt keeps text editing tiny; replace with an inline editor for multi-line text
-          const text = window.prompt("Text", e.text ?? "");
-          if (text !== null) patch(e.id, { text });
-        },
-      })}
-      overlay={(e) => (
-        <>
-          {e.columnName && missing.includes(e.columnName) && (
-            <span title={`Column "${e.columnName}" not found`} className="absolute -top-2 -left-2 text-xs">
-              ⚠
-            </span>
-          )}
-          {e.id === selected && (
-            <span
-              aria-label="Resize handle"
-              className="absolute -right-1.5 -bottom-1.5 size-3 cursor-nwse-resize rounded-sm bg-primary-pressed"
-              onPointerDown={(ev) => start("resize", e, ev)}
-            />
-          )}
-        </>
-      )}
-    />
+    <div className="flex flex-col gap-2">
+      <label className="flex items-center gap-2 text-sm">
+        <input type="checkbox" checked={snap} onChange={(e) => toggleSnap(e.target.checked)} />
+        Snap to elements
+      </label>
+      <SlideRenderer
+        ref={box}
+        elements={elements}
+        tabIndex={0}
+        aria-label="Template canvas"
+        className="border outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        onKeyDown={keyDown}
+        onPointerMove={move}
+        onPointerUp={() => (drag.current = null)}
+        onPointerDown={() => setSelected(null)}
+        onDragOver={(ev) => ev.preventDefault()}
+        onDrop={drop}
+        elementProps={(e) => ({
+          "aria-label": `Element ${e.columnName ?? e.kind}`,
+          className: cn(
+            "cursor-move touch-none",
+            e.id === selected ? "outline outline-2 outline-primary-pressed" : "outline outline-1 outline-dashed outline-black/20",
+            e.columnName && missing.includes(e.columnName) && "bg-accent-yellow",
+          ),
+          onPointerDown: (ev) => start("move", e, ev),
+          onDoubleClick: () => {
+            if (e.kind !== "text") return;
+            // ponytail: window.prompt keeps text editing tiny; replace with an inline editor for multi-line text
+            const text = window.prompt("Text", e.text ?? "");
+            if (text !== null) patch(e.id, { text });
+          },
+        })}
+        overlay={(e) => (
+          <>
+            {e.columnName && missing.includes(e.columnName) && (
+              <span title={`Column "${e.columnName}" not found`} className="absolute -top-2 -left-2 text-xs">
+                ⚠
+              </span>
+            )}
+            {e.id === selected && (
+              <span
+                aria-label="Resize handle"
+                className="absolute -right-1.5 -bottom-1.5 size-3 cursor-nwse-resize rounded-sm bg-primary-pressed"
+                onPointerDown={(ev) => start("resize", e, ev)}
+              />
+            )}
+          </>
+        )}
+      />
+    </div>
   );
 }

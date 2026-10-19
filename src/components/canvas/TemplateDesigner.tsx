@@ -1,26 +1,27 @@
 "use client";
 
 import { useState } from "react";
-import { ListDialog } from "@/components/shell/ListDialog";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { parseTemplate } from "@/domain/project";
 import { fieldElement, missingColumns, unusedColumns } from "@/domain/template";
 import type { Template } from "@/domain/types";
-import { listTemplates, loadTemplate, saveTemplate, type ListItem } from "@/lib/api";
+import { fileExists, pickFile, saveFile } from "@/lib/files";
 import { useProject } from "@/state/ProjectContext";
 import { AddElementButtons } from "./AddElementButtons";
 import { EditableCanvas } from "./EditableCanvas";
 import { UnusedColumnsSidebar } from "./UnusedColumnsSidebar";
 
 const fork = (t: Template): Template => (t.id === "standard" ? { ...t, id: crypto.randomUUID(), name: "My template" } : t);
+// Templates are saved as local files; the suffix keeps them apart from project .json files in the same folder.
+const fileName = (t: Template) => `${t.name}.template.json`;
 
 export function TemplateDesigner() {
   const { state, dispatch } = useProject();
-  const [picker, setPicker] = useState<ListItem[] | null>(null);
   const [message, setMessage] = useState("");
-  // Open "Save as" / overwrite dialog; `clash` is the saved template that already has this name.
-  const [dialog, setDialog] = useState<{ name: string; clash?: ListItem } | null>(null);
+  // Open save dialog; `clash` means a file with this name already exists and we ask before overwriting it.
+  const [dialog, setDialog] = useState<{ name: string; clash?: boolean } | null>(null);
   const columns = state.project!.table.columns; // rendered only when a project is open
   const template = state.activeTemplate!;
   const missing = missingColumns(template, columns);
@@ -37,23 +38,25 @@ export function TemplateDesigner() {
     }
   };
 
-  const store = async (t: Template) => {
+  const store = (t: Template) => {
+    if (!t.name) throw new Error("Give the template a name first");
     setDialog(null);
     setTemplate(t);
-    await saveTemplate(t);
-    return "Template saved";
+    return saveFile(fileName(t), JSON.stringify(t), "application/json", "Templates");
   };
 
-  // Saving under a name another saved template already has asks before overwriting it.
-  const save = (name: string, asNew: boolean) =>
+  // Save template asks for a file name and asks again before replacing an existing file.
+  const saveAs = (name: string) =>
     run(async () => {
-      const t = { ...fork(template), name: name.trim() };
-      if (asNew) t.id = crypto.randomUUID();
-      const key = t.name.toLowerCase();
-      const clash = (await listTemplates()).find((i) => i.id !== t.id && i.name.trim().toLowerCase() === key);
-      if (clash) return setDialog({ name: t.name, clash });
+      const t = { ...fork(template), id: crypto.randomUUID(), name: name.trim() };
+      if (await fileExists(fileName(t), "Templates")) return setDialog({ name: t.name, clash: true });
       return store(t);
     });
+
+  const load = async () => {
+    const json = await pickFile(".json,application/json");
+    if (json !== null) setTemplate(parseTemplate(json));
+  };
 
   return (
     <div className="flex flex-col gap-3">
@@ -61,9 +64,8 @@ export function TemplateDesigner() {
         <Button onClick={() => setTemplate({ version: 1, id: crypto.randomUUID(), name: "New template", elements: [] })}>
           New template
         </Button>
-        <Button onClick={() => run(async () => setPicker(await listTemplates()))}>Load template</Button>
-        <Button onClick={() => save(template.name, false)}>Save template</Button>
-        <Button onClick={() => setDialog({ name: template.name })}>Save as…</Button>
+        <Button onClick={() => run(load)}>Load template</Button>
+        <Button onClick={() => setDialog({ name: template.name })}>Save template</Button>
         <AddElementButtons onAdd={(el) => edit({ elements: [...template.elements, el] })} />
         <Input
           aria-label="Template name"
@@ -96,12 +98,14 @@ export function TemplateDesigner() {
           </DialogHeader>
           {dialog?.clash ? (
             <>
-              <p>A template named &quot;{dialog.clash.name}&quot; already exists. Do you want to overwrite it?</p>
+              <p>A template named &quot;{dialog.name}&quot; already exists. Do you want to overwrite it?</p>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setDialog(null)}>
                   No
                 </Button>
-                <Button onClick={() => run(() => store({ ...fork(template), id: dialog.clash!.id, name: dialog.name }))}>
+                <Button
+                  onClick={() => run(async () => store({ ...fork(template), id: crypto.randomUUID(), name: dialog.name }))}
+                >
                   Yes
                 </Button>
               </DialogFooter>
@@ -111,7 +115,7 @@ export function TemplateDesigner() {
               className="flex flex-col gap-4"
               onSubmit={(e) => {
                 e.preventDefault();
-                save(dialog!.name, true);
+                saveAs(dialog!.name);
               }}
             >
               <Input
@@ -128,17 +132,6 @@ export function TemplateDesigner() {
           )}
         </DialogContent>
       </Dialog>
-      <ListDialog
-        title="Load template"
-        items={picker}
-        onClose={() => setPicker(null)}
-        onPick={(id) =>
-          run(async () => {
-            setTemplate(await loadTemplate(id));
-            setPicker(null);
-          })
-        }
-      />
     </div>
   );
 }

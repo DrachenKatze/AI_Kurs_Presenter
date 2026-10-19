@@ -11,14 +11,14 @@ The P1 slice alone delivers the core promise: *table in → presentation out*.
 ### A1 · Project Lifecycle (New / Load / Save) — P1
 - **Feature name:** Project Lifecycle
 - **User problem:** I want to keep my work and continue later without an account or server.
-- **Expected outcome:** Each project is one `.json` file (metadata, table, slides, images) in my **Projects folder**. Templates are not stored in it; they live in the Templates folder (C4).
-- **Short description:** Top bar buttons New / Load / Save. Save writes the project to the Projects folder. Load lists the projects in that folder and validates the chosen file. New starts an empty project that uses the Standard Template.
+- **Expected outcome:** Each project is one `.json` file (metadata, table, slides, images) on my own computer. Templates are not stored in it; they live in the template library (C4).
+- **Short description:** Top bar buttons New / Load / Save. Save asks for a name and downloads `<name>.json`. Load opens the file dialog and validates the chosen file. New starts an empty project that uses the Standard Template. A default save folder is added later (E3).
 
 ### A2 · App Shell & Tab Navigation — P1
 - **Feature name:** App Shell & Tabs
 - **User problem:** I need a clear path through the workflow: Data → Template → Presentation.
 - **Expected outcome:** Three tabs show the same project. Without a project, each tab shows an empty state that asks me to create or load one.
-- **Short description:** Top navigation bar with the three tabs and a Settings button (placeholder). Styled with the colors from Design.md (mint button, violet pressed state, lilac tabs).
+- **Short description:** Top navigation bar with the three tabs and a Settings button (opens E1). The colors come from the active design scheme (E2).
 
 ---
 
@@ -73,8 +73,8 @@ The P1 slice alone delivers the core promise: *table in → presentation out*.
 ### C4 · Shared Template Library (New / Save / Load) — P1
 - **Feature name:** Template Library
 - **User problem:** I want to reuse my designs in all my projects, not just the one where I made them.
-- **Expected outcome:** Templates are saved as `.json` files in my **Templates folder**, outside any project. Every project can load any template from that folder.
-- **Short description:** New (blank), Save (to the Templates folder), and Load (a list of the folder's contents). It is P1 because templates are no longer saved with the project, so without this a designed template would be lost.
+- **Expected outcome:** Templates are saved in the browser's template library (localStorage), outside any project. Every project can load any saved template.
+- **Short description:** New (blank), Save (to the library), and Load (a list of the saved templates). It is P1 because templates are no longer saved with the project, so without this a designed template would be lost.
 
 ### C5 · Alignment Guides — P3
 - **Feature name:** Alignment Guides
@@ -126,8 +126,20 @@ The P1 slice alone delivers the core promise: *table in → presentation out*.
 
 ## Epic E — Settings
 
-### E1 · Settings Dialog — P3
+### E1 · Settings Dialog — P2
 - **Feature name:** Settings
-- **User problem:** No defined need yet.
-- **Expected outcome:** —
-- **Short description:** The button exists in the shell (A2). A likely first use is choosing the Projects and Templates folder paths, which are fixed defaults until then (YAGNI).
+- **User problem:** I need one place to set how the app looks and where my files go.
+- **Expected outcome:** The Settings button in the top bar opens a dialog with two options: Design (E2) and Save Folder (E3). My choices are still set when I reopen the app.
+- **Short description:** The button in A2 is now enabled. Settings are stored in localStorage and are not part of the project file, because they belong to the user, not to the project.
+
+### E2 · Design Scheme Selector — P2
+- **Feature name:** Design Selector
+- **User problem:** I want to change the colors of the app to my taste.
+- **Expected outcome:** In Settings I choose one of four schemes: **Night Fox**, **Green Woods**, **Classic**, **Historical**. The header, buttons, pressed buttons, and tabs change color right away.
+- **Short description:** Source: `documents/Fix/Design Selector.md`, colors in Design.md → *Design Scheme*. Each scheme sets the existing theme variables (`--primary`, `--primary-pressed`, `--tab`, plus a new `--header`) through a `data-theme` attribute on `<html>`, so components don't change. The header currently has a fixed color (`bg-[#6f5993]` in TopBar) and must use `--header`. Default scheme: Night Fox.
+
+### E3 · Default Save Folder — P2
+- **Feature name:** Default Save Folder
+- **User problem:** Every saved file ends up in my Downloads folder, and I have to move it by hand.
+- **Expected outcome:** In Settings I pick a folder on my hard drive. From then on, every save (project `.json`, Markdown list `.md`) goes straight into that folder. Without a chosen folder, saving works as before (download).
+- **Short description:** Source: `documents/Fix/Set Save Folder.md`. Uses the browser's File System Access API (`showDirectoryPicker`). The folder handle is stored in IndexedDB, because localStorage can't store it. Limits: only Chromium browsers (Chrome, Edge) support this, so Firefox and Safari fall back to download. The browser may ask for permission again after a restart.
