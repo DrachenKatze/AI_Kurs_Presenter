@@ -23,7 +23,14 @@ export function SlideRenderer({ elements, elementProps, overlay, className, ...r
             key={e.id}
             {...extra}
             className={cn("absolute", extra.className)}
-            style={{ left: `${e.x}%`, top: `${e.y}%`, width: `${e.w}%`, height: `${e.h}%`, ...extra.style }}
+            style={{
+              left: `${e.x}%`,
+              top: `${e.y}%`,
+              width: `${e.w}%`,
+              height: `${e.h}%`,
+              transform: e.rotation ? `rotate(${e.rotation}deg)` : undefined,
+              ...extra.style,
+            }}
           >
             <div
               className="h-full w-full overflow-hidden"

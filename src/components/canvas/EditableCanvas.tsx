@@ -1,13 +1,16 @@
 "use client";
 
 import { useRef, useState, type DragEvent, type KeyboardEvent, type PointerEvent } from "react";
+import { Button } from "@/components/ui/button";
 import { moveElement, resizeElement, snapMove, snapResize } from "@/domain/geometry";
+import { shiftById } from "@/domain/order";
 import { fieldElement } from "@/domain/template";
 import type { SlideElement } from "@/domain/types";
 import { cn } from "@/lib/utils";
 import { SlideRenderer } from "./SlideRenderer";
 
 export const COLUMN_MIME = "application/x-column";
+const ROTATE_STEP = 15; // degrees per Rotate click
 const SNAP_KEY = "presenter:snap"; // shared by the Template Designer and the Slide Editor
 
 const readSnap = () => {
@@ -42,6 +45,10 @@ export function EditableCanvas({ elements, onChange, missing = [] }: Props) {
 
   const patch = (id: string, p: Partial<SlideElement>) =>
     onChange(elements.map((e) => (e.id === id ? { ...e, ...p } : e)));
+
+  const sel = elements.find((e) => e.id === selected);
+  const rotate = (by: number) => sel && patch(sel.id, { rotation: ((sel.rotation ?? 0) + by + 360) % 360 });
+  const shift = (delta: 1 | -1) => sel && onChange(shiftById(elements, sel.id, delta));
 
   const start = (mode: Drag["mode"], e: SlideElement, ev: PointerEvent) => {
     ev.stopPropagation();
@@ -97,6 +104,21 @@ export function EditableCanvas({ elements, onChange, missing = [] }: Props) {
         <input type="checkbox" checked={snap} onChange={(e) => toggleSnap(e.target.checked)} />
         Snap to elements
       </label>
+      {/* Elements are drawn in array order, so later ones overlap earlier ones */}
+      <div className="flex flex-wrap gap-2">
+        <Button size="sm" variant="outline" disabled={!sel || sel === elements.at(-1)} onClick={() => shift(1)}>
+          Bring forward
+        </Button>
+        <Button size="sm" variant="outline" disabled={!sel || sel === elements[0]} onClick={() => shift(-1)}>
+          Send backward
+        </Button>
+        <Button size="sm" variant="outline" disabled={!sel} onClick={() => rotate(-ROTATE_STEP)}>
+          Rotate left
+        </Button>
+        <Button size="sm" variant="outline" disabled={!sel} onClick={() => rotate(ROTATE_STEP)}>
+          Rotate right
+        </Button>
+      </div>
       <SlideRenderer
         ref={box}
         elements={elements}

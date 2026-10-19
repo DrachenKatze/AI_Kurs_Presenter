@@ -71,6 +71,23 @@ test("edits change only that slide", async () => {
   expect(screen.getByLabelText("Slide 2")).toHaveTextContent("second");
 });
 
+test("layer order and rotation of the selected element", async () => {
+  await openEditor();
+  const order = () => [...canvas().querySelectorAll("[aria-label^='Element']")].map((e) => e.getAttribute("aria-label"));
+  expect(order()).toEqual(["Element Title", "Element Body"]);
+  expect(screen.getByRole("button", { name: "Rotate left" })).toBeDisabled();
+
+  fireEvent.pointerDown(screen.getByLabelText("Element Title"), { pointerId: 1 });
+  expect(screen.getByRole("button", { name: "Send backward" })).toBeDisabled();
+  await userEvent.click(screen.getByRole("button", { name: "Bring forward" }));
+  expect(order()).toEqual(["Element Body", "Element Title"]);
+
+  await userEvent.click(screen.getByRole("button", { name: "Rotate left" }));
+  expect(screen.getByLabelText("Element Title").style.transform).toBe("rotate(345deg)");
+  await userEvent.click(screen.getByRole("button", { name: "Rotate right" }));
+  expect(screen.getByLabelText("Element Title").style.transform).toBe("");
+});
+
 test("add a text box and edit its text", async () => {
   await openEditor();
   const before = elements();

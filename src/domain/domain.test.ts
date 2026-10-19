@@ -1,5 +1,5 @@
 import { parseMarkdownTable, toMarkdownTable } from "./markdownTable";
-import { moveById } from "./order";
+import { moveById, shiftById } from "./order";
 import { generateSlides } from "./presentation";
 import { createProject, parseProject, parseTemplate } from "./project";
 import { addColumn, addRow, deleteColumn, deleteRow, editCell, renameColumn, sortRows, toggleHidden } from "./table";
@@ -140,6 +140,14 @@ describe("row order and visibility", () => {
     expect(moveById(rows, "a", "c").map((r) => r.id)).toEqual(["b", "c", "a"]);
     expect(moveById(rows, "c", "a").map((r) => r.id)).toEqual(["c", "a", "b"]);
     expect(moveById(rows, "a", "x")).toBe(rows);
+  });
+
+  test("shiftById swaps with a neighbour and stops at the ends", () => {
+    expect(shiftById(rows, "a", 1).map((r) => r.id)).toEqual(["b", "a", "c"]);
+    expect(shiftById(rows, "c", -1).map((r) => r.id)).toEqual(["a", "c", "b"]);
+    expect(shiftById(rows, "c", 1)).toBe(rows);
+    expect(shiftById(rows, "a", -1)).toBe(rows);
+    expect(shiftById(rows, "x", 1)).toBe(rows);
   });
 
   test("toggleHidden flips one row, hidden rows get no slide", () => {

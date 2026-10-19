@@ -25,6 +25,7 @@ export interface SlideElement {
   y: number;
   w: number;
   h: number;
+  rotation?: number; // degrees clockwise around the centre
   columnName?: string; // kind = 'field'; matched by name so templates work across projects
   text?: string; // kind = 'text', or the resolved value in a slide snapshot
   src?: string; // kind = 'image' (data URL)
