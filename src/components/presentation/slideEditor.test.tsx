@@ -71,6 +71,71 @@ test("edits change only that slide", async () => {
   expect(screen.getByLabelText("Slide 2")).toHaveTextContent("second");
 });
 
+test("layer order and rotation of the selected element", async () => {
+  await openEditor();
+  const order = () => [...canvas().querySelectorAll("[aria-label^='Element']")].map((e) => e.getAttribute("aria-label"));
+  expect(order()).toEqual(["Element Title", "Element Body"]);
+  expect(screen.getByRole("button", { name: "Rotate left" })).toBeDisabled();
+
+  fireEvent.pointerDown(screen.getByLabelText("Element Title"), { pointerId: 1 });
+  expect(screen.getByRole("button", { name: "Send backward" })).toBeDisabled();
+  await userEvent.click(screen.getByRole("button", { name: "Bring forward" }));
+  expect(order()).toEqual(["Element Body", "Element Title"]);
+
+  await userEvent.click(screen.getByRole("button", { name: "Rotate left" }));
+  expect(screen.getByLabelText("Element Title").style.transform).toBe("rotate(345deg)");
+  await userEvent.click(screen.getByRole("button", { name: "Rotate right" }));
+  expect(screen.getByLabelText("Element Title").style.transform).toBe("");
+});
+
+test("text style of the selected element", async () => {
+  await openEditor();
+  expect(screen.queryByLabelText("Text style")).not.toBeInTheDocument();
+  fireEvent.pointerDown(screen.getByLabelText("Element Title"), { pointerId: 1 });
+  const text = () => screen.getByLabelText("Element Title").firstElementChild as HTMLElement;
+
+  fireEvent.change(screen.getByLabelText("Color"), { target: { value: "#ff0000" } });
+  fireEvent.change(screen.getByLabelText("Size"), { target: { value: "40" } });
+  await userEvent.selectOptions(screen.getByLabelText("Font"), "Georgia");
+  await userEvent.click(screen.getByRole("button", { name: "Bold" }));
+  await userEvent.click(screen.getByRole("button", { name: "Italic" }));
+  await userEvent.selectOptions(screen.getByLabelText("Effect"), "glow");
+  fireEvent.change(screen.getByLabelText("Effect color"), { target: { value: "#00ff00" } });
+
+  expect(text().style).toMatchObject({ color: "rgb(255, 0, 0)", fontSize: "4cqw", fontFamily: "Georgia", fontWeight: "700", fontStyle: "italic" });
+  expect(text().style.textShadow).toContain("#00ff00");
+});
+
+test("background: color, gradient, picture, remove", async () => {
+  await openEditor();
+  const bg = () => canvas().style.background;
+  const open = () => userEvent.click(screen.getByRole("button", { name: "Add background" }));
+
+  await open();
+  fireEvent.change(screen.getByLabelText("Background color"), { target: { value: "#ff0000" } });
+  await userEvent.click(screen.getByRole("button", { name: "Apply" }));
+  expect(bg()).toContain("rgb(255, 0, 0)");
+  expect(screen.getByLabelText("Slide 1").firstElementChild).toHaveStyle({ background: "rgb(255, 0, 0)" }); // thumbnail too
+
+  await open();
+  await userEvent.click(screen.getByRole("radio", { name: "Gradient" }));
+  await userEvent.selectOptions(screen.getByLabelText("Direction"), "Top to bottom");
+  await userEvent.click(screen.getByRole("button", { name: "Apply" }));
+  expect(bg()).toContain("linear-gradient(180deg");
+
+  await open();
+  await userEvent.click(screen.getByRole("radio", { name: "Picture" }));
+  expect(screen.getByRole("button", { name: "Apply" })).toBeDisabled();
+  vi.mocked(pickImage).mockResolvedValueOnce({ src: "data:image/png;base64,AAAA", size: 100 });
+  await userEvent.click(screen.getByRole("button", { name: "Choose picture" }));
+  await userEvent.click(screen.getByRole("button", { name: "Apply" }));
+  expect(bg()).toContain("data:image/png;base64,AAAA");
+
+  await open();
+  await userEvent.click(screen.getByRole("button", { name: "Remove background" }));
+  expect(bg()).toBe("");
+});
+
 test("add a text box and edit its text", async () => {
   await openEditor();
   const before = elements();

@@ -8,6 +8,7 @@ export function generateSlides(table: DataTable, template: Template): Slide[] {
     .map((row) => ({
       id: crypto.randomUUID(),
       rowId: row.id,
+      background: template.background,
       elements: template.elements.map((e) => {
         const copy = { ...e, id: crypto.randomUUID() };
         if (e.kind === "field") {

@@ -1,5 +1,5 @@
 import { parseMarkdownTable, toMarkdownTable } from "./markdownTable";
-import { moveById } from "./order";
+import { moveById, shiftById } from "./order";
 import { generateSlides } from "./presentation";
 import { createProject, parseProject, parseTemplate } from "./project";
 import { addColumn, addRow, deleteColumn, deleteRow, editCell, renameColumn, sortRows, toggleHidden } from "./table";
@@ -127,6 +127,11 @@ describe("template + presentation", () => {
     expect(slides[0].elements[0].id).not.toBe(slides[1].elements[0].id);
   });
 
+  test("generateSlides: copies the template background", () => {
+    const tpl = { ...standardTemplate(table.columns), background: { kind: "color" as const, color: "#ff0000" } };
+    expect(generateSlides(table, tpl).every((s) => s.background === tpl.background)).toBe(true);
+  });
+
   test("generateSlides: missing column gives empty text", () => {
     const tpl = standardTemplate([...table.columns, { id: "x", name: "Ghost" }]);
     expect(generateSlides(table, tpl)[0].elements[2].text).toBe("");
@@ -140,6 +145,14 @@ describe("row order and visibility", () => {
     expect(moveById(rows, "a", "c").map((r) => r.id)).toEqual(["b", "c", "a"]);
     expect(moveById(rows, "c", "a").map((r) => r.id)).toEqual(["c", "a", "b"]);
     expect(moveById(rows, "a", "x")).toBe(rows);
+  });
+
+  test("shiftById swaps with a neighbour and stops at the ends", () => {
+    expect(shiftById(rows, "a", 1).map((r) => r.id)).toEqual(["b", "a", "c"]);
+    expect(shiftById(rows, "c", -1).map((r) => r.id)).toEqual(["a", "c", "b"]);
+    expect(shiftById(rows, "c", 1)).toBe(rows);
+    expect(shiftById(rows, "a", -1)).toBe(rows);
+    expect(shiftById(rows, "x", 1)).toBe(rows);
   });
 
   test("toggleHidden flips one row, hidden rows get no slide", () => {

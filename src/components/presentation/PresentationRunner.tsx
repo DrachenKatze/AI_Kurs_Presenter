@@ -45,6 +45,7 @@ export function PresentationRunner({ slides, onExit }: { slides: Slide[]; onExit
     >
       <SlideRenderer
         elements={slides[index].elements}
+        background={slides[index].background}
         className="w-[min(100vw,calc(100vh*16/9))]"
         aria-label={`Slide ${index + 1} of ${slides.length}`}
       />

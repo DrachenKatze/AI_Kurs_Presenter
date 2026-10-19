@@ -25,17 +25,35 @@ export interface SlideElement {
   y: number;
   w: number;
   h: number;
+  rotation?: number; // degrees clockwise around the centre
   columnName?: string; // kind = 'field'; matched by name so templates work across projects
   text?: string; // kind = 'text', or the resolved value in a slide snapshot
   src?: string; // kind = 'image' (data URL)
-  style?: { fontSize: number; bold?: boolean; align?: "left" | "center" | "right" };
+  style?: TextStyle;
+}
+
+export interface TextStyle {
+  fontSize: number;
+  bold?: boolean;
+  italic?: boolean;
+  align?: "left" | "center" | "right";
+  color?: string; // CSS colour, default black
+  font?: string; // font family, default the app font
+  effect?: "shadow" | "glow";
+  effectColor?: string;
 }
 
 export interface Slide {
   id: Id;
   rowId: Id;
   elements: SlideElement[]; // fixed snapshot
+  background?: Background;
 }
+
+export type Background =
+  | { kind: "color"; color: string }
+  | { kind: "gradient"; from: string; to: string; angle: number } // CSS angle, 90 = left to right
+  | { kind: "image"; src: string }; // data URL, covers the slide
 
 export interface Project {
   version: 1;
@@ -50,4 +68,5 @@ export interface Template {
   id: Id;
   name: string;
   elements: SlideElement[];
+  background?: Background; // copied to every generated slide
 }
