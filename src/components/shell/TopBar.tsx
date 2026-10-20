@@ -23,7 +23,7 @@ export function TopBar() {
 
   // Projects are saved to and loaded from .json files on the user's machine.
   const load = async () => {
-    const json = await pickFile(".json,application/json");
+    const json = await pickFile(".json,application/json", "Project");
     if (json !== null) dispatch({ type: "open", project: parseProject(json) });
   };
 

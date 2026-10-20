@@ -126,7 +126,7 @@ export function EditableCanvas({ elements, background, timer, onChange, missing 
         {sel?.kind === "timer" && <TimerStyleButton element={sel} onChange={(style) => patch(sel.id, { style })} />}
       </div>
       {sel && (sel.kind === "text" || sel.kind === "field") && (
-        <TextStyleBar element={sel} onChange={(style) => patch(sel.id, { style })} />
+        <TextStyleBar element={sel} onChange={(style) => patch(sel.id, { style })} allowGradient />
       )}
       <SlideRenderer
         ref={box}

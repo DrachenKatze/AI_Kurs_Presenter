@@ -85,8 +85,26 @@ export async function saveFile(name: string, content: string, type: string, kind
   return "Saved";
 }
 
-/** Opens the file dialog and resolves with the chosen file's text, or null if cancelled. */
-export function pickFile(accept: string): Promise<string | null> {
+type OpenPicker = (o: object) => Promise<FileSystemFileHandle[]>;
+
+/**
+ * Opens the file dialog and resolves with the chosen file's text, or null if cancelled.
+ * With a save folder set, the dialog starts there (in the kind's preset subfolder if those are on);
+ * that needs showOpenFilePicker (Chromium), other browsers get the plain dialog.
+ */
+export async function pickFile(accept: string, kind?: Kind): Promise<string | null> {
+  const picker = typeof window !== "undefined" && (window as unknown as { showOpenFilePicker?: OpenPicker }).showOpenFilePicker;
+  const startIn = kind && picker ? await targetFolder(kind).catch(() => null) : null;
+  if (picker && startIn) {
+    const parts = accept.split(",");
+    const mime = parts.find((p) => p.includes("/")) ?? "text/plain";
+    try {
+      const [handle] = await picker({ startIn, types: [{ accept: { [mime]: parts.filter((p) => p.startsWith(".")) } }] });
+      return (await handle.getFile()).text();
+    } catch {
+      return null; // cancelled
+    }
+  }
   return new Promise((resolve) => {
     const input = Object.assign(document.createElement("input"), { type: "file", accept });
     input.onchange = async () => resolve((await input.files?.[0]?.text()) ?? null);

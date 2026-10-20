@@ -71,4 +71,5 @@ export interface Template {
   name: string;
   elements: SlideElement[];
   background?: Background; // copied to every generated slide
+  timer?: number; // seconds, copied to every generated slide like the timer element and its style
 }

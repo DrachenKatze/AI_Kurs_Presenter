@@ -93,6 +93,23 @@ test("editing the standard template gives it its own id and name", async () => {
   expect(screen.getByLabelText("Template name")).toHaveValue("My template");
 });
 
+test("Add Timer toggles to Remove Timer; Seconds and Visible set the template timer, which can be styled", async () => {
+  fireEvent.click(await screen.findByRole("button", { name: "Add Timer" }));
+  expect(screen.getByLabelText("Seconds")).toHaveValue(10);
+  expect(screen.queryByLabelText("Element timer")).toBeNull();
+
+  fireEvent.click(screen.getByLabelText("Visible"));
+  fireEvent.change(screen.getByLabelText("Seconds"), { target: { value: "7" } });
+  const timer = screen.getByLabelText("Element timer");
+  expect(timer).toHaveTextContent("7");
+  fireEvent.pointerDown(timer, { clientX: 0, clientY: 0, pointerId: 1 });
+  expect(screen.getByRole("button", { name: "Style" })).toBeInTheDocument();
+
+  fireEvent.click(screen.getByRole("button", { name: "Remove Timer" }));
+  expect(screen.queryByLabelText("Element timer")).toBeNull();
+  expect(screen.queryByLabelText("Seconds")).toBeNull();
+});
+
 describe("saving and loading local files", () => {
   let saved: string[] = [];
   beforeEach(async () => {

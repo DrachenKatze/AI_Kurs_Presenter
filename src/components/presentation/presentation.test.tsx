@@ -49,6 +49,15 @@ test("New Presentation creates one slide per visible row; Start is enabled after
   expect(confirm).toHaveBeenCalled();
 });
 
+test("slides take over the template's timer seconds and styled timer element", () => {
+  const template = setTimer({ ...standardTemplate(table.columns), timer: undefined }, 7, true);
+  template.elements = template.elements.map((e) => (e.kind === "timer" ? { ...e, style: { fontSize: 30, color: "#ff0000" } } : e));
+  const [slide] = generateSlides(table, template);
+  expect(slide.timer).toBe(7);
+  expect(slide.elements.find((e) => e.kind === "timer")?.style?.color).toBe("#ff0000");
+  expect(generateSlides(table, standardTemplate(table.columns))[0].timer).toBeUndefined();
+});
+
 test("moveById reorders and ignores unknown ids", () => {
   const slides = generateSlides(table, standardTemplate(table.columns));
   const [a, b, c] = slides.map((s) => s.id);
@@ -97,29 +106,28 @@ test("runner: a timer counts down and moves on at 0, hidden or visible; the last
   vi.useRealTimers();
 });
 
-test("Add Timer sets every slide, warns before overwriting own settings; Remove Timer clears them", async () => {
+test("Add Timer toggles to Remove Timer; Seconds and Visible show only with a timer and apply directly", async () => {
   render(
     <ProjectProvider>
       <Open />
     </ProjectProvider>,
   );
   await userEvent.click(await screen.findByRole("button", { name: "New Presentation" }));
-  const remove = screen.getByRole("button", { name: "Remove Timer" });
-  expect(remove).toBeDisabled();
+  expect(screen.queryByLabelText("Seconds")).toBeNull();
+  expect(screen.queryByLabelText("Visible")).toBeNull();
+
+  await userEvent.click(screen.getByRole("button", { name: "Add Timer" }));
+  expect(screen.queryByRole("button", { name: "Add Timer" })).toBeNull();
   expect(screen.getByLabelText("Seconds")).toHaveValue(10);
   expect(screen.getByLabelText("Visible")).not.toBeChecked();
 
   await userEvent.click(screen.getByLabelText("Visible"));
-  await userEvent.click(screen.getByRole("button", { name: "Add Timer" }));
   expect(screen.getAllByLabelText(/^Slide \d$/).every((s) => s.textContent?.includes("10"))).toBe(true);
-
-  const confirm = vi.spyOn(window, "confirm").mockReturnValue(false);
   fireEvent.change(screen.getByLabelText("Seconds"), { target: { value: "5" } });
-  await userEvent.click(screen.getByRole("button", { name: "Add Timer" }));
-  expect(confirm).toHaveBeenCalledOnce();
-  expect(screen.getByLabelText("Slide 1")).toHaveTextContent("10"); // declined
+  expect(screen.getAllByLabelText(/^Slide \d$/).every((s) => s.textContent?.includes("5"))).toBe(true);
 
-  await userEvent.click(remove);
-  expect(screen.getByLabelText("Slide 1")).not.toHaveTextContent("10");
-  expect(remove).toBeDisabled();
+  await userEvent.click(screen.getByRole("button", { name: "Remove Timer" }));
+  expect(screen.getByLabelText("Slide 1")).not.toHaveTextContent("5");
+  expect(screen.getByRole("button", { name: "Add Timer" })).toBeInTheDocument();
+  expect(screen.queryByLabelText("Seconds")).toBeNull();
 });
