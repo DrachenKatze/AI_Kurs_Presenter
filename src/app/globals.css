@@ -163,3 +163,17 @@
     @apply font-sans;
   }
 }
+/* Slide effects of the presentation runner; the longest (explode: 100ms delay + 700ms) must fit EFFECT_MS */
+@keyframes fx-in { from { opacity: 0; } }
+@keyframes fx-out { to { opacity: 0; } }
+@keyframes fx-turn { to { transform: rotateY(-90deg); } }
+@keyframes fx-explode { to { transform: translate(var(--dx), var(--dy)) rotate(var(--r)) scale(0.3); opacity: 0; } }
+.fx-fade-out { animation: fx-out 350ms ease-in both; }
+.fx-fade-in-late { animation: fx-in 350ms ease-out 350ms both; }
+.fx-turn { transform-origin: left center; animation: fx-turn 700ms ease-in both; }
+.fx-explode { animation: fx-explode 700ms ease-in var(--d) both; }
+
+/* Element animations (domain/animation.ts); individual transform properties so they combine */
+@keyframes el-shake { 25% { rotate: var(--shake); } 75% { rotate: calc(var(--shake) * -1); } }
+@keyframes el-jump { 50% { translate: 0 calc(var(--jump) * -1); } }
+@keyframes el-pulse { 25% { scale: calc(1 + var(--pulse)); } 75% { scale: calc(1 - var(--pulse)); } }

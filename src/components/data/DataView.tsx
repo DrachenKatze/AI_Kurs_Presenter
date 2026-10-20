@@ -26,7 +26,7 @@ export function DataView() {
   };
 
   const loadMd = async () => {
-    const md = await pickFile(".md,text/markdown");
+    const md = await pickFile(".md,text/markdown", "Table");
     if (md === null) return;
     try {
       setTable(parseMarkdownTable(md));

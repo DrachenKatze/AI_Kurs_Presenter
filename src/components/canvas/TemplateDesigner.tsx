@@ -6,12 +6,14 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { Input } from "@/components/ui/input";
 import { parseTemplate } from "@/domain/project";
 import { fieldElement, missingColumns, unusedColumns } from "@/domain/template";
+import { DEFAULT_TIMER_SECONDS, isTimerVisible, removeTimer, setTimer } from "@/domain/timer";
 import type { Template } from "@/domain/types";
 import { fileExists, pickFile, saveFile } from "@/lib/files";
 import { useProject } from "@/state/ProjectContext";
 import { AddElementButtons } from "./AddElementButtons";
 import { BackgroundButton } from "./BackgroundButton";
 import { EditableCanvas } from "./EditableCanvas";
+import { TransitionSelect } from "./TransitionSelect";
 import { UnusedColumnsSidebar } from "./UnusedColumnsSidebar";
 
 const fork = (t: Template): Template => (t.id === "standard" ? { ...t, id: crypto.randomUUID(), name: "My template" } : t);
@@ -55,7 +57,7 @@ export function TemplateDesigner() {
     });
 
   const load = async () => {
-    const json = await pickFile(".json,application/json");
+    const json = await pickFile(".json,application/json", "Templates");
     if (json !== null) setTemplate(parseTemplate(json));
   };
 
@@ -69,6 +71,37 @@ export function TemplateDesigner() {
         <Button onClick={() => setDialog({ name: template.name })}>Save template</Button>
         <AddElementButtons onAdd={(el) => edit({ elements: [...template.elements, el] })} />
         <BackgroundButton value={template.background} onChange={(background) => edit({ background })} />
+        <TransitionSelect value={template.transition} onChange={(transition) => edit({ transition })} />
+        <Button
+          variant="outline"
+          onClick={() =>
+            setTemplate(template.timer === undefined ? setTimer(fork(template), DEFAULT_TIMER_SECONDS, false) : removeTimer(fork(template)))
+          }
+        >
+          {template.timer === undefined ? "Add Timer" : "Remove Timer"}
+        </Button>
+        {template.timer !== undefined && (
+          <>
+            <label className="flex items-center gap-2 text-sm">
+              Seconds
+              <input
+                type="number"
+                min={1}
+                className="h-8 w-16 rounded-lg border bg-background px-2"
+                value={template.timer}
+                onChange={(e) => edit({ timer: Math.max(1, Math.round(Number(e.target.value)) || 1) })}
+              />
+            </label>
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={isTimerVisible(template)}
+                onChange={(e) => setTemplate(setTimer(fork(template), template.timer!, e.target.checked))}
+              />
+              Visible
+            </label>
+          </>
+        )}
         <Input
           aria-label="Template name"
           className="w-56"
@@ -86,7 +119,13 @@ export function TemplateDesigner() {
       )}
       <div className="flex items-start gap-4">
         <div className="min-w-0 flex-1">
-          <EditableCanvas elements={template.elements} background={template.background} missing={missing} onChange={(elements) => edit({ elements })} />
+          <EditableCanvas
+            elements={template.elements}
+            background={template.background}
+            timer={template.timer}
+            missing={missing}
+            onChange={(elements) => edit({ elements })}
+          />
         </div>
         <UnusedColumnsSidebar
           columns={unusedColumns(template, columns)}

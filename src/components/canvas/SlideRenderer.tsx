@@ -1,14 +1,19 @@
-import type { ComponentProps, HTMLAttributes, ReactNode } from "react";
+import type { CSSProperties, ComponentProps, HTMLAttributes, ReactNode } from "react";
 import type { Background, SlideElement, TextStyle } from "@/domain/types";
+import { animationCss } from "@/domain/animation";
 import { cn } from "@/lib/utils";
 
 interface Props extends ComponentProps<"div"> {
   elements: SlideElement[];
   background?: Background;
+  /** Seconds shown by a timer element. */
+  timer?: number;
   /** Extra props per element wrapper (used by the editor for selection and dragging). */
   elementProps?: (e: SlideElement) => HTMLAttributes<HTMLDivElement>;
   /** Extra content per element, outside its clipped area (resize handle, warnings). */
   overlay?: (e: SlideElement) => ReactNode;
+  /** Plays the element animations; only the presentation does, editing stays still. */
+  animate?: boolean;
 }
 
 function backgroundCss(bg?: Background) {
@@ -19,22 +24,38 @@ function backgroundCss(bg?: Background) {
 }
 
 // In cqw like the font size, so effects scale with the slide
-function textShadow(s?: TextStyle) {
+function shadows(s?: TextStyle) {
   const c = s?.effectColor ?? "#888888";
-  if (s?.effect === "shadow") return `0.2cqw 0.2cqw 0.3cqw ${c}`;
-  if (s?.effect === "glow") return `0 0 0.5cqw ${c}, 0 0 1cqw ${c}`;
-  return undefined;
+  if (s?.effect === "shadow") return [`0.2cqw 0.2cqw 0.3cqw ${c}`];
+  if (s?.effect === "glow") return [`0 0 0.5cqw ${c}`, `0 0 1cqw ${c}`];
+  return [];
+}
+
+function textCss(s?: TextStyle): CSSProperties {
+  const sh = shadows(s);
+  const g = s?.gradient;
+  // Gradient letters are transparent text over a clipped background; text-shadow would show through, so they use drop-shadow
+  if (g) {
+    return {
+      color: "transparent",
+      backgroundImage: `linear-gradient(${g.angle}deg, ${g.from}, ${g.to})`,
+      backgroundClip: "text",
+      WebkitBackgroundClip: "text",
+      filter: sh.map((d) => `drop-shadow(${d})`).join(" ") || undefined,
+    };
+  }
+  return { color: s?.color, textShadow: sh.join(", ") || undefined };
 }
 
 /** Draws elements in percent on a 16:9 box. Shared by thumbnails, the editors and the fullscreen runner. */
-export function SlideRenderer({ elements, background, elementProps, overlay, className, style, ...rest }: Props) {
+export function SlideRenderer({ elements, background, timer, elementProps, overlay, animate, className, style, ...rest }: Props) {
   return (
     // container-type lets font sizes scale with the slide width (cqw), so every size looks the same
     <div className={cn("relative aspect-video w-full overflow-hidden bg-white text-black [container-type:inline-size]", className)}
       style={{ background: backgroundCss(background), ...style }}
       {...rest}
     >
-      {elements.map((e) => {
+      {[...elements.filter((e) => e.kind !== "timer"), ...elements.filter((e) => e.kind === "timer")].map((e) => {
         const extra = elementProps?.(e) ?? {};
         const s = e.style;
         return (
@@ -58,14 +79,16 @@ export function SlideRenderer({ elements, background, elementProps, overlay, cla
                 fontWeight: s?.bold ? 700 : 400,
                 fontStyle: s?.italic ? "italic" : undefined,
                 fontFamily: s?.font,
-                color: s?.color,
-                textShadow: textShadow(s),
+                ...textCss(s),
                 textAlign: s?.align ?? "left",
+                ...(animate && animationCss(e.animation)), // on the inner box, so the frame's rotation stays
               }}
             >
               {e.kind === "image" ? (
                 // eslint-disable-next-line @next/next/no-img-element -- data URLs, nothing for next/image to optimise
                 <img src={e.src} alt="" className="h-full w-full object-contain" draggable={false} />
+              ) : e.kind === "timer" ? (
+                (timer ?? "")
               ) : (
                 (e.text ?? `[${e.columnName ?? ""}]`)
               )}

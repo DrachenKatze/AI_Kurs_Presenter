@@ -4,7 +4,10 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { generateSlides } from "@/domain/presentation";
 import { standardTemplate } from "@/domain/template";
+import { DEFAULT_TIMER_SECONDS, individualTimers, isTimerVisible, removeTimer, setTimer } from "@/domain/timer";
+import type { Transition } from "@/domain/transition";
 import type { Slide } from "@/domain/types";
+import { TransitionSelect } from "@/components/canvas/TransitionSelect";
 import { useProject } from "@/state/ProjectContext";
 import { PresentationRunner } from "./PresentationRunner";
 import { SlideEditorDialog } from "./SlideEditorDialog";
@@ -14,6 +17,8 @@ export function PresentationView() {
   const { state, dispatch } = useProject();
   const [running, setRunning] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [seconds, setSeconds] = useState(DEFAULT_TIMER_SECONDS);
+  const [timerVisible, setTimerVisible] = useState(false);
   const project = state.project!; // rendered only when a project is open
   const { slides } = project.presentation;
   // Templates are local files: the choice is Standard or the one open in the Template Designer.
@@ -27,13 +32,36 @@ export function PresentationView() {
     if (slides.length > 0 && !window.confirm("Replace the existing slides?")) return;
     const template = active && templateId === active.id ? active : standardTemplate(project.table.columns);
     update({ slides: generateSlides(project.table, template) });
+    // The slides take the template's timer; the shared Seconds/Visible controls follow it
+    if (template.timer !== undefined) {
+      setSeconds(template.timer);
+      setTimerVisible(isTimerVisible(template));
+    }
+  };
+
+  const hasTimer = slides.some((s) => s.timer !== undefined);
+
+  // Sets every slide; while a timer is set, Seconds and Visible apply directly through this too
+  const applyTimer = (sec: number, visible: boolean) => {
+    const n = individualTimers(slides, seconds, timerVisible); // slides edited apart from the shared setting
+    if (n > 0 && !window.confirm(`${n} slide(s) have their own timer settings. Overwrite them?`)) return;
+    setSeconds(sec);
+    setTimerVisible(visible);
+    update({ slides: slides.map((s) => setTimer(s, sec, visible)) });
+  };
+
+  // Effect of every slide; like the timer it can be set for all slides here or per slide in the Slide Editor
+  const effects = new Set(slides.map((s) => s.transition ?? "none"));
+  const setEffect = (transition: Transition) => {
+    if (effects.size > 1 && !window.confirm("Slides have their own effects. Overwrite them?")) return;
+    update({ slides: slides.map((s) => ({ ...s, transition })) });
   };
 
   return (
     <div className="flex flex-col gap-3">
       <div className="flex flex-wrap items-center gap-2">
         <label className="flex items-center gap-2 text-sm">
-          Template
+          <b>Template</b>
           <select
             className="h-8 rounded-lg border bg-background px-2"
             value={templateId}
@@ -44,6 +72,34 @@ export function PresentationView() {
           </select>
         </label>
         <Button onClick={generate}>New Presentation</Button>
+        <Button
+          variant="outline"
+          disabled={slides.length === 0}
+          onClick={() => (hasTimer ? update({ slides: slides.map(removeTimer) }) : applyTimer(seconds, timerVisible))}
+        >
+          {hasTimer ? "Remove Timer" : "Add Timer"}
+        </Button>
+        {hasTimer && (
+          <>
+            <label className="flex items-center gap-2 text-sm">
+              Seconds
+              <input
+                type="number"
+                min={1}
+                className="h-8 w-16 rounded-lg border bg-background px-2"
+                value={seconds}
+                onChange={(e) => applyTimer(Math.max(1, Math.round(Number(e.target.value)) || 1), timerVisible)}
+              />
+            </label>
+            <label className="flex items-center gap-2 text-sm">
+              <input type="checkbox" checked={timerVisible} onChange={(e) => applyTimer(seconds, e.target.checked)} />
+              Visible
+            </label>
+          </>
+        )}
+        {slides.length > 0 && (
+          <TransitionSelect value={effects.size === 1 ? [...effects][0] : undefined} mixed={effects.size > 1} onChange={setEffect} />
+        )}
         <Button variant="outline" disabled={slides.length === 0} onClick={() => setRunning(true)}>
           Start Presentation
         </Button>

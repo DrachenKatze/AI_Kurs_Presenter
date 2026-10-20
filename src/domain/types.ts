@@ -1,3 +1,5 @@
+import type { Transition } from "./transition";
+
 export type Id = string; // crypto.randomUUID()
 
 export interface Column {
@@ -16,7 +18,7 @@ export interface DataTable {
   rows: Row[];
 }
 
-export type ElementKind = "field" | "text" | "image";
+export type ElementKind = "field" | "text" | "image" | "timer"; // timer: the countdown of its slide, always in front
 
 export interface SlideElement {
   id: Id;
@@ -30,6 +32,14 @@ export interface SlideElement {
   text?: string; // kind = 'text', or the resolved value in a slide snapshot
   src?: string; // kind = 'image' (data URL)
   style?: TextStyle;
+  animation?: Animation; // loops while the slide is shown in the presentation
+}
+
+/** Each part is optional and they can run together; speed = seconds per back-and-forth. */
+export interface Animation {
+  shake?: { angle: number; speed: number }; // degrees to each side
+  jump?: { height: number; speed: number }; // percent of the slide height
+  pulse?: { size: number; speed: number }; // percent bigger and smaller
 }
 
 export interface TextStyle {
@@ -41,6 +51,7 @@ export interface TextStyle {
   font?: string; // font family, default the app font
   effect?: "shadow" | "glow";
   effectColor?: string;
+  gradient?: { from: string; to: string; angle: number }; // fills the letters instead of color
 }
 
 export interface Slide {
@@ -48,6 +59,8 @@ export interface Slide {
   rowId: Id;
   elements: SlideElement[]; // fixed snapshot
   background?: Background;
+  timer?: number; // seconds until the runner moves on; shown only if the slide has a timer element
+  transition?: Transition; // effect when the runner moves to this slide, default none
 }
 
 export type Background =
@@ -69,4 +82,6 @@ export interface Template {
   name: string;
   elements: SlideElement[];
   background?: Background; // copied to every generated slide
+  timer?: number; // seconds, copied to every generated slide like the timer element and its style
+  transition?: Transition; // copied to every generated slide
 }

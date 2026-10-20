@@ -19,7 +19,7 @@ function Thumbnail({ slide, index, onOpen }: { slide: Slide; index: number; onOp
       style={{ transform: CSS.Transform.toString(transform), transition }}
       className={`cursor-grab rounded border-2 border-tab bg-tab p-1 ${isDragging ? "z-10 opacity-60" : ""}`}
     >
-      <SlideRenderer elements={slide.elements} background={slide.background} />
+      <SlideRenderer elements={slide.elements} background={slide.background} timer={slide.timer} />
       <div className="pt-1 text-center text-xs">{index + 1}</div>
     </div>
   );
