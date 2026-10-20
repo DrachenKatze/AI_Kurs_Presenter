@@ -4,6 +4,11 @@ import { DIRECTIONS } from "./BackgroundButton";
 
 // Web-safe stacks, so slides look the same without loading fonts
 const FONTS = ["Arial", "Verdana", "Trebuchet MS", "Georgia", "Times New Roman", "Courier New", "Impact"];
+const ALIGNS = [
+  { align: "left", label: "Left" },
+  { align: "center", label: "Center" },
+  { align: "right", label: "Right" },
+] as const;
 
 interface Props {
   element: SlideElement;
@@ -12,7 +17,7 @@ interface Props {
   allowGradient?: boolean;
 }
 
-/** Colour, size, font, bold/italic and shadow/glow of a selected text or field element. */
+/** Colour, size, font, bold/italic, alignment and shadow/glow of a selected text or field element. */
 export function TextStyleBar({ element, onChange, allowGradient }: Props) {
   const s: TextStyle = element.style ?? { fontSize: 24 };
   const set = (p: Partial<TextStyle>) => onChange({ ...s, ...p });
@@ -94,6 +99,13 @@ export function TextStyleBar({ element, onChange, allowGradient }: Props) {
       <Button size="sm" aria-pressed={!!s.italic} onClick={() => set({ italic: !s.italic })}>
         <i>Italic</i>
       </Button>
+      <div role="group" aria-label="Alignment" className="flex gap-1">
+        {ALIGNS.map((a) => (
+          <Button key={a.align} size="sm" aria-pressed={(s.align ?? "left") === a.align} onClick={() => set({ align: a.align })}>
+            {a.label}
+          </Button>
+        ))}
+      </div>
       <label className="flex items-center gap-1">
         Effect
         <select
