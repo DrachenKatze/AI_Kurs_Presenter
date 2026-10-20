@@ -7,6 +7,7 @@ import { shiftById } from "@/domain/order";
 import { fieldElement } from "@/domain/template";
 import type { Background, SlideElement } from "@/domain/types";
 import { cn } from "@/lib/utils";
+import { AnimationButton } from "./AnimationButton";
 import { SlideRenderer } from "./SlideRenderer";
 import { TextStyleBar } from "./TextStyleBar";
 import { TimerStyleButton } from "./TimerStyleButton";
@@ -124,6 +125,7 @@ export function EditableCanvas({ elements, background, timer, onChange, missing 
           Rotate right
         </Button>
         {sel?.kind === "timer" && <TimerStyleButton element={sel} onChange={(style) => patch(sel.id, { style })} />}
+        {sel && <AnimationButton element={sel} onChange={(animation) => patch(sel.id, { animation })} />}
       </div>
       {sel && (sel.kind === "text" || sel.kind === "field") && (
         <TextStyleBar element={sel} onChange={(style) => patch(sel.id, { style })} allowGradient />

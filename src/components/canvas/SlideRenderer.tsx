@@ -1,5 +1,6 @@
 import type { CSSProperties, ComponentProps, HTMLAttributes, ReactNode } from "react";
 import type { Background, SlideElement, TextStyle } from "@/domain/types";
+import { animationCss } from "@/domain/animation";
 import { cn } from "@/lib/utils";
 
 interface Props extends ComponentProps<"div"> {
@@ -11,6 +12,8 @@ interface Props extends ComponentProps<"div"> {
   elementProps?: (e: SlideElement) => HTMLAttributes<HTMLDivElement>;
   /** Extra content per element, outside its clipped area (resize handle, warnings). */
   overlay?: (e: SlideElement) => ReactNode;
+  /** Plays the element animations; only the presentation does, editing stays still. */
+  animate?: boolean;
 }
 
 function backgroundCss(bg?: Background) {
@@ -45,7 +48,7 @@ function textCss(s?: TextStyle): CSSProperties {
 }
 
 /** Draws elements in percent on a 16:9 box. Shared by thumbnails, the editors and the fullscreen runner. */
-export function SlideRenderer({ elements, background, timer, elementProps, overlay, className, style, ...rest }: Props) {
+export function SlideRenderer({ elements, background, timer, elementProps, overlay, animate, className, style, ...rest }: Props) {
   return (
     // container-type lets font sizes scale with the slide width (cqw), so every size looks the same
     <div className={cn("relative aspect-video w-full overflow-hidden bg-white text-black [container-type:inline-size]", className)}
@@ -78,6 +81,7 @@ export function SlideRenderer({ elements, background, timer, elementProps, overl
                 fontFamily: s?.font,
                 ...textCss(s),
                 textAlign: s?.align ?? "left",
+                ...(animate && animationCss(e.animation)), // on the inner box, so the frame's rotation stays
               }}
             >
               {e.kind === "image" ? (

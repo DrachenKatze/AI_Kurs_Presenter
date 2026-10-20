@@ -110,6 +110,23 @@ test("Add Timer toggles to Remove Timer; Seconds and Visible set the template ti
   expect(screen.queryByLabelText("Seconds")).toBeNull();
 });
 
+test("Animation: shake, jump and grow/shrink can be combined; the editor canvas stays still", async () => {
+  fireEvent.pointerDown(await screen.findByLabelText("Element Title"), { clientX: 0, clientY: 0, pointerId: 1 });
+  fireEvent.click(screen.getByRole("button", { name: "Animation" }));
+  fireEvent.click(screen.getByLabelText("Shake"));
+  fireEvent.click(screen.getByLabelText("Jump"));
+  fireEvent.click(screen.getByLabelText("Grow and shrink"));
+  fireEvent.change(screen.getByLabelText("Shake angle"), { target: { value: "20" } });
+  fireEvent.change(screen.getByLabelText("Jump speed"), { target: { value: "2" } });
+  // the open dialog hides the page behind it from role queries
+  expect(screen.getByRole("button", { name: "Animation", hidden: true })).toHaveAttribute("aria-pressed", "true");
+
+  fireEvent.click(screen.getByLabelText("Shake")); // off again
+  expect(screen.queryByLabelText("Shake angle")).toBeNull();
+  const content = screen.getByLabelText("Element Title").firstElementChild as HTMLElement;
+  expect(content.style.animation).toBe("");
+});
+
 describe("saving and loading local files", () => {
   let saved: string[] = [];
   beforeEach(async () => {

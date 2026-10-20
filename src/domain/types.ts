@@ -32,6 +32,14 @@ export interface SlideElement {
   text?: string; // kind = 'text', or the resolved value in a slide snapshot
   src?: string; // kind = 'image' (data URL)
   style?: TextStyle;
+  animation?: Animation; // loops while the slide is shown in the presentation
+}
+
+/** Each part is optional and they can run together; speed = seconds per back-and-forth. */
+export interface Animation {
+  shake?: { angle: number; speed: number }; // degrees to each side
+  jump?: { height: number; speed: number }; // percent of the slide height
+  pulse?: { size: number; speed: number }; // percent bigger and smaller
 }
 
 export interface TextStyle {

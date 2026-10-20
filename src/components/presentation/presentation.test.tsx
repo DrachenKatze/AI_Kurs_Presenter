@@ -69,6 +69,14 @@ test("runner: a slide with an effect keeps the old slide on screen until the eff
   vi.useRealTimers();
 });
 
+test("runner: element animations play in the presentation", () => {
+  const [a] = generateSlides(table, standardTemplate(table.columns));
+  const slide = { ...a, elements: a.elements.map((e) => ({ ...e, animation: { jump: { height: 5, speed: 1 } } })) };
+  render(<PresentationRunner slides={[slide]} onExit={() => {}} />);
+  const content = screen.getByLabelText("Slide 1 of 1").firstElementChild!.firstElementChild as HTMLElement;
+  expect(content.style.animation).toContain("el-jump 1s");
+});
+
 test("the Page effect dropdown sets every slide and asks before overwriting own effects", async () => {
   render(
     <ProjectProvider>

@@ -122,6 +122,7 @@ export function PresentationRunner({ slides, onExit }: { slides: Slide[]; onExit
           elements={slides[index].elements}
           background={slides[index].background}
           timer={left}
+          animate
           className={cn(effect === "fade" && "fx-fade-in-late")}
           aria-label={`Slide ${index + 1} of ${slides.length}`}
         />
