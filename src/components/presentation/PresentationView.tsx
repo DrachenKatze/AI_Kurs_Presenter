@@ -5,7 +5,9 @@ import { Button } from "@/components/ui/button";
 import { generateSlides } from "@/domain/presentation";
 import { standardTemplate } from "@/domain/template";
 import { DEFAULT_TIMER_SECONDS, individualTimers, isTimerVisible, removeTimer, setTimer } from "@/domain/timer";
+import type { Transition } from "@/domain/transition";
 import type { Slide } from "@/domain/types";
+import { TransitionSelect } from "@/components/canvas/TransitionSelect";
 import { useProject } from "@/state/ProjectContext";
 import { PresentationRunner } from "./PresentationRunner";
 import { SlideEditorDialog } from "./SlideEditorDialog";
@@ -48,6 +50,13 @@ export function PresentationView() {
     update({ slides: slides.map((s) => setTimer(s, sec, visible)) });
   };
 
+  // Effect of every slide; like the timer it can be set for all slides here or per slide in the Slide Editor
+  const effects = new Set(slides.map((s) => s.transition ?? "none"));
+  const setEffect = (transition: Transition) => {
+    if (effects.size > 1 && !window.confirm("Slides have their own effects. Overwrite them?")) return;
+    update({ slides: slides.map((s) => ({ ...s, transition })) });
+  };
+
   return (
     <div className="flex flex-col gap-3">
       <div className="flex flex-wrap items-center gap-2">
@@ -87,6 +96,9 @@ export function PresentationView() {
               Visible
             </label>
           </>
+        )}
+        {slides.length > 0 && (
+          <TransitionSelect value={effects.size === 1 ? [...effects][0] : undefined} mixed={effects.size > 1} onChange={setEffect} />
         )}
         <Button variant="outline" disabled={slides.length === 0} onClick={() => setRunning(true)}>
           Start Presentation

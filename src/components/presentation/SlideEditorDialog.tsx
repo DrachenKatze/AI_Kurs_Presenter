@@ -3,6 +3,7 @@
 import { AddElementButtons } from "@/components/canvas/AddElementButtons";
 import { BackgroundButton } from "@/components/canvas/BackgroundButton";
 import { EditableCanvas } from "@/components/canvas/EditableCanvas";
+import { TransitionSelect } from "@/components/canvas/TransitionSelect";
 import { UnusedColumnsSidebar } from "@/components/canvas/UnusedColumnsSidebar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { fieldElement, unusedColumns } from "@/domain/template";
@@ -40,6 +41,7 @@ export function SlideEditorDialog({ slide, index, table, onChange, onClose }: Pr
             <div className="flex flex-wrap items-center gap-2">
               <AddElementButtons onAdd={(el) => setElements([...slide.elements, el])} />
               <BackgroundButton value={slide.background} onChange={(background) => onChange({ ...slide, background })} />
+              <TransitionSelect value={slide.transition} onChange={(transition) => onChange({ ...slide, transition })} />
               {slide.timer !== undefined && (
                 <>
                   <label className="flex items-center gap-2 text-sm">

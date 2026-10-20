@@ -88,10 +88,10 @@ export function TextStyleBar({ element, onChange, allowGradient }: Props) {
           ))}
         </select>
       </label>
-      <Button size="sm" variant={s.bold ? "default" : "outline"} aria-pressed={!!s.bold} onClick={() => set({ bold: !s.bold })}>
+      <Button size="sm" aria-pressed={!!s.bold} onClick={() => set({ bold: !s.bold })}>
         <b>Bold</b>
       </Button>
-      <Button size="sm" variant={s.italic ? "default" : "outline"} aria-pressed={!!s.italic} onClick={() => set({ italic: !s.italic })}>
+      <Button size="sm" aria-pressed={!!s.italic} onClick={() => set({ italic: !s.italic })}>
         <i>Italic</i>
       </Button>
       <label className="flex items-center gap-1">

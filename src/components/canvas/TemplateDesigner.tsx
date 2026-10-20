@@ -13,6 +13,7 @@ import { useProject } from "@/state/ProjectContext";
 import { AddElementButtons } from "./AddElementButtons";
 import { BackgroundButton } from "./BackgroundButton";
 import { EditableCanvas } from "./EditableCanvas";
+import { TransitionSelect } from "./TransitionSelect";
 import { UnusedColumnsSidebar } from "./UnusedColumnsSidebar";
 
 const fork = (t: Template): Template => (t.id === "standard" ? { ...t, id: crypto.randomUUID(), name: "My template" } : t);
@@ -70,6 +71,7 @@ export function TemplateDesigner() {
         <Button onClick={() => setDialog({ name: template.name })}>Save template</Button>
         <AddElementButtons onAdd={(el) => edit({ elements: [...template.elements, el] })} />
         <BackgroundButton value={template.background} onChange={(background) => edit({ background })} />
+        <TransitionSelect value={template.transition} onChange={(transition) => edit({ transition })} />
         <Button
           variant="outline"
           onClick={() =>

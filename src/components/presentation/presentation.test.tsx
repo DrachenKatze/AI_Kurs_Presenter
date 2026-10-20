@@ -49,11 +49,45 @@ test("New Presentation creates one slide per visible row; Start is enabled after
   expect(confirm).toHaveBeenCalled();
 });
 
+test("runner: a slide with an effect keeps the old slide on screen until the effect is over", () => {
+  vi.useFakeTimers();
+  const [a, b, c] = generateSlides(table, standardTemplate(table.columns));
+  render(<PresentationRunner slides={[a, { ...b, transition: "explode" }, { ...c, transition: "fade" }]} onExit={() => {}} />);
+  const runner = screen.getByRole("dialog");
+  const hidden = () => runner.querySelectorAll("[aria-hidden]").length;
+
+  fireEvent.click(runner);
+  expect(screen.getByLabelText("Slide 2 of 3")).toHaveTextContent("Two");
+  expect(hidden()).toBe(16 * 9); // the old slide as tiles
+  act(() => vi.advanceTimersByTime(1000));
+  expect(hidden()).toBe(0);
+
+  fireEvent.click(runner);
+  expect(hidden()).toBe(1); // fade: one old slide under the new one
+  fireEvent.keyDown(runner, { key: "ArrowLeft" }); // back to slide 2 = explode again
+  expect(hidden()).toBe(16 * 9);
+  vi.useRealTimers();
+});
+
+test("the Page effect dropdown sets every slide and asks before overwriting own effects", async () => {
+  render(
+    <ProjectProvider>
+      <Open />
+    </ProjectProvider>,
+  );
+  expect(screen.queryByLabelText("Page effect")).toBeNull(); // no slides yet
+  await userEvent.click(await screen.findByRole("button", { name: "New Presentation" }));
+  expect(screen.getByLabelText("Page effect")).toHaveValue("none");
+  await userEvent.selectOptions(screen.getByLabelText("Page effect"), "turn");
+  expect(screen.getByLabelText("Page effect")).toHaveValue("turn");
+});
+
 test("slides take over the template's timer seconds and styled timer element", () => {
   const template = setTimer({ ...standardTemplate(table.columns), timer: undefined }, 7, true);
   template.elements = template.elements.map((e) => (e.kind === "timer" ? { ...e, style: { fontSize: 30, color: "#ff0000" } } : e));
-  const [slide] = generateSlides(table, template);
+  const [slide] = generateSlides(table, { ...template, transition: "fade" });
   expect(slide.timer).toBe(7);
+  expect(slide.transition).toBe("fade");
   expect(slide.elements.find((e) => e.kind === "timer")?.style?.color).toBe("#ff0000");
   expect(generateSlides(table, standardTemplate(table.columns))[0].timer).toBeUndefined();
 });

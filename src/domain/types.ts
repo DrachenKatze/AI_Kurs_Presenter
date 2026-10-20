@@ -1,3 +1,5 @@
+import type { Transition } from "./transition";
+
 export type Id = string; // crypto.randomUUID()
 
 export interface Column {
@@ -50,6 +52,7 @@ export interface Slide {
   elements: SlideElement[]; // fixed snapshot
   background?: Background;
   timer?: number; // seconds until the runner moves on; shown only if the slide has a timer element
+  transition?: Transition; // effect when the runner moves to this slide, default none
 }
 
 export type Background =
@@ -72,4 +75,5 @@ export interface Template {
   elements: SlideElement[];
   background?: Background; // copied to every generated slide
   timer?: number; // seconds, copied to every generated slide like the timer element and its style
+  transition?: Transition; // copied to every generated slide
 }

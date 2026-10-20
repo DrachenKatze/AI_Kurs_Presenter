@@ -69,7 +69,6 @@ export function BackgroundButton({ value, onChange }: Props) {
                     size="sm"
                     role="radio"
                     aria-checked={draft.kind === k.kind}
-                    variant={draft.kind === k.kind ? "default" : "outline"}
                     onClick={() => setKind(k.kind)}
                   >
                     {k.label}
