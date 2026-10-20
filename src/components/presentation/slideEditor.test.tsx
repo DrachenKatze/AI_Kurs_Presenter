@@ -104,6 +104,14 @@ test("text style of the selected element", async () => {
 
   expect(text().style).toMatchObject({ color: "rgb(255, 0, 0)", fontSize: "4cqw", fontFamily: "Georgia", fontWeight: "700", fontStyle: "italic" });
   expect(text().style.textShadow).toContain("#00ff00");
+
+  expect(screen.getByRole("button", { name: "Left" })).toHaveAttribute("aria-pressed", "true"); // default
+  await userEvent.click(screen.getByRole("button", { name: "Center" }));
+  expect(text().style.textAlign).toBe("center");
+  expect(screen.getByRole("button", { name: "Center" })).toHaveAttribute("aria-pressed", "true");
+  expect(screen.getByRole("button", { name: "Left" })).toHaveAttribute("aria-pressed", "false");
+  await userEvent.click(screen.getByRole("button", { name: "Right" }));
+  expect(text().style.textAlign).toBe("right");
 });
 
 test("background: color, gradient, picture, remove", async () => {
